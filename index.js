@@ -68,8 +68,8 @@ function onReceiveMessageFromNative(json) {
     console.log("onReceiveMessageFromNative:", message);
     if (message.type === 'methodCallback') {
         const callback = methodCallbacks[message.id];
-        if (typeof callback === 'function')
-            callback(message.body);
+        if (typeof callback === 'function' && message.body)
+            callback(JSON.parse(message.body));
         delete methodCallbacks[message.id];
     } else {
         onMessage.raiseEvent(message);
