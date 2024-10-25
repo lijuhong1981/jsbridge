@@ -6,8 +6,8 @@
   "homepage": "https://github.com/lijuhong1981/jsbridge#readme",
   "license": "ISC",
   "type": "module",
-  "main": "index.js",
-  "module": "index.js",
+  "main": "./jsbridge/jsbridge.min.js",
+  "module": "./jsbridge/jsbridge.esm.min.js",
   "publishConfig": {
     "access": "public"
   },
