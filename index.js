@@ -10,6 +10,14 @@ const messageCallbacks = {};
 const onReceiveMessage = new Event();
 
 /**
+ * 一些预置的方法名定义
+ * @type {object}
+*/
+const Method = Object.freeze({
+    
+});
+
+/**
  * 向android端发送消息
  * @param {object} message 发送的消息对象
  * @param {string} message.type 消息类型，必填项
