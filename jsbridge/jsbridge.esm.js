@@ -639,22 +639,25 @@ class EventSubscriber extends Destroyable {
     }
 }
 
-const methodCallbacks = {};
+const messageCallbacks = {};
 /**
  * 接收android端发送过来的消息事件
  * @type {Event} 
 */
-const onMessage = new EventSubscriber();
+const onReceiveMessage = new EventSubscriber();
 
 /**
  * 向android端发送消息
- * @param {string} type 消息类型，必填项
- * @param {object|undefined} body 消息体内容，会转换为JSON字符串发送
- * @param {string|undefined} id 消息id，不填则由程序自动生成 
- * @returns {string} 发送的消息id，为false则说明发送未成功
+ * @param {object} message 发送的消息对象
+ * @param {string} message.type 消息类型，必填项
+ * @param {string|undefined} message.id 消息id，不填则由程序自动生成
+ * @param {object|undefined} message.body 消息体内容对象
+ * @param {Function|undefined} message.callback 消息回调函数，如果该消息有回应，则通过该函数回调，可不填
+ * @returns {string|false} 发送的消息id，为false则说明发送未成功
  */
-function postMessageToNavive(type, body = {}, id = v4()) {
-    Check.typeOf.string('type', type);
+function postMessageToApp(message) {
+    Check.defined('message', message);
+    Check.typeOf.string('type', message.type);
     if (!window.jsbridgeInterface) {
         console.warn('not found window.jsbridgeInterface object');
         return false;
@@ -663,13 +666,18 @@ function postMessageToNavive(type, body = {}, id = v4()) {
         console.warn('window.jsbridgeInterface.onBridgeMessage is not function', window.jsbridgeInterface.onBridgeMessage);
         return false;
     }
-    const message = {
-        type,
-        body: JSON.stringify(body),
-        id
-    };
-    const json = JSON.stringify(message);
-    console.log('postMessageToNavive:', message);
+    if (!message.id)
+        message.id = v4();
+    if (!message.body)
+        message.body = {};
+    if (typeof message.callback === 'function')
+        messageCallbacks[message.id] = message.callback;
+    const json = JSON.stringify({
+        type: message.type,
+        id: message.id,
+        body: message.body,
+    });
+    console.log('postMessageToApp:', json);
     window.jsbridgeInterface.onBridgeMessage(json);
     return message.id;
 }
@@ -678,21 +686,19 @@ function postMessageToNavive(type, body = {}, id = v4()) {
  * 调用android端方法
  * @param {string} method 方法名，必填项
  * @param {object|undefined} params 调用参数，键值对形式
- * @param {Function|undefined} callback 回调函数
- * @returns {boolean} 调用是否成功
+ * @param {Function|undefined} callback 回调函数，可回应该方法的调用结果
+ * @returns {string|false} 发送的消息id，为false则说明调用未成功
  */
-function callMethod(method, params = {}, callback) {
+function callAppMethod(method, params = {}, callback) {
     Check.typeOf.string('method', method);
-    const id = postMessageToNavive("callMethod", {
-        method,
-        params,
+    return postMessageToApp({
+        type: 'callMethod',
+        body: {
+            method,
+            params,
+        },
+        callback,
     });
-    if (id) {
-        if (typeof callback === 'function')
-            methodCallbacks[id] = callback;
-        return true;
-    }
-    return false;
 }
 
 /**
@@ -700,20 +706,20 @@ function callMethod(method, params = {}, callback) {
  * @param {string} json
  * @returns {void}
  */
-function onReceiveMessageFromNative(json) {
+function onReceiveMessageFromApp(json) {
+    console.log("onReceiveMessageFromApp:", json);
     const message = JSON.parse(json);
-    console.log("onReceiveMessageFromNative:", message);
-    if (message.type === 'methodCallback') {
-        const callback = methodCallbacks[message.id];
+    if (message.type === 'messageCallback' || message.type === 'methodCallback') {
+        const callback = messageCallbacks[message.id];
         if (typeof callback === 'function' && message.body)
-            callback(JSON.parse(message.body));
-        delete methodCallbacks[message.id];
+            callback(message.body);
+        delete messageCallbacks[message.id];
     } else {
-        onMessage.raiseEvent(message);
+        onReceiveMessage.raiseEvent(message);
     }
 }
 
-window.onBridgeMessage = onReceiveMessageFromNative;
+window.onBridgeMessage = onReceiveMessageFromApp;
 
-export { callMethod, onMessage, postMessageToNavive as postMessage };
+export { callAppMethod as callMethod, onReceiveMessage as onMessage, postMessageToApp as postMessage };
 //# sourceMappingURL=jsbridge.esm.js.map

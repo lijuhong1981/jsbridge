@@ -1,5 +1,5 @@
 # jsbridge
-用于android端与web端相互通讯的小插件
+用于AndroidApp端与Web端相互通讯的小插件
 
 ## 导入
 
@@ -39,35 +39,40 @@ import * as jsbridge from '@lijuhong1981/jsbridge';
 
 ## 使用
 
-### 发送消息
+### 向App端发送消息
 
 ```js
 /**
  * 发送消息
- * @param {string} type 消息类型，必填项
- * @param {object|undefined} body 消息体内容，会转换为JSON字符串发送
- * @returns {string} 发送的消息id，为false则说明发送未成功
+ * @param {object} message 发送的消息对象
+ * @param {string} message.type 消息类型，必填项
+ * @param {string|undefined} message.id 消息id，不填则由程序自动生成
+ * @param {object|undefined} message.body 消息体内容对象
+ * @param {Function|undefined} message.callback 消息回调函数，如果该消息有回应，则通过该函数回调，可不填
+ * @returns {string|false} 发送的消息id，为false则说明发送未成功
  */
-jsbridge.postMessage(type, body);
+jsbridge.postMessage({ type, body });
 ```
 
-### 调用方法
+### 调用App端方法
 
 ```js
 /**
- * 调用android端方法
+ * 调用方法
  * @param {string} method 方法名，必填项
  * @param {object|undefined} params 调用参数，键值对形式
- * @param {Function|undefined} callback 回调函数
- * @returns {boolean} 调用是否成功
+ * @param {Function|undefined} callback 回调函数，可回应该方法的调用结果
+ * @returns {string|false} 发送的消息id，为false则说明调用未成功
  */
-jsbridge.callMethod(method, params = {}, callback);
+jsbridge.callMethod(method, params = {}, (result) => {
+    // TODO
+});
 ```
 
-### 接收消息
+### 接收App端发送的消息
 
 ```js
-// 注册消息监听器
+// 注册消息接收
 jsbridge.onMessage.addEventListener((message) => {
     console.log("onMessage:", message);
     // TODO
