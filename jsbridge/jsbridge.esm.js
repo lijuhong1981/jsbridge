@@ -640,22 +640,46 @@ class EventSubscriber extends Destroyable {
 }
 
 const messageCallbacks = {};
-/**
- * 接收android端发送过来的消息事件
- * @type {Event} 
-*/
-const onReceiveMessage = new EventSubscriber();
 
 /**
- * 向android端发送消息
+ * 接收app端发送过来的消息
+ * @type {EventSubscriber}
+ * 
+ * @example
+ * onMessage.addEventListener((message) => {});
+*/
+const onMessage = new EventSubscriber();
+
+/**
+ * 消息回调通知
+ * @callback OnMessageCallback
+ * @param {object} response 响应内容对象
+*/
+
+/**
+ * 方法执行结果对象定义
+ * @typedef {object} ResultData
+ * @property {boolean} success 是否执行成功
+ * @property {string} errorInfo 执行失败的错误信息 
+ * @property {object} data 执行成功返回数据
+ */
+
+/**
+ * 方法回调通知
+ * @callback OnMethodCallback
+ * @param {ResultData} result 执行结果对象
+*/
+
+/**
+ * 向app端发送消息
  * @param {object} message 发送的消息对象
  * @param {string} message.type 消息类型，必填项
  * @param {string|undefined} message.id 消息id，不填则由程序自动生成
  * @param {object|undefined} message.body 消息体内容对象
- * @param {Function|undefined} message.callback 消息回调函数，如果该消息有回应，则通过该函数回调，可不填
+ * @param {OnMessageCallback|undefined} message.callback 消息回调函数，如果消息有回应，则通过该函数回调，可不填
  * @returns {string|false} 发送的消息id，为false则说明发送未成功
  */
-function postMessageToApp(message) {
+function postMessage(message) {
     Check.defined('message', message);
     Check.typeOf.string('type', message.type);
     if (!window.jsbridgeInterface) {
@@ -683,15 +707,15 @@ function postMessageToApp(message) {
 }
 
 /**
- * 调用android端方法
+ * 调用app端方法
  * @param {string} method 方法名，必填项
- * @param {object|undefined} params 调用参数，键值对形式
- * @param {Function|undefined} callback 回调函数，可回应该方法的调用结果
+ * @param {object|undefined} params 调用参数，键值对形式，可不填
+ * @param {OnMethodCallback|undefined} callback 回调函数，回应该方法的调用结果，可不填
  * @returns {string|false} 发送的消息id，为false则说明调用未成功
  */
-function callAppMethod(method, params = {}, callback) {
+function callMethod(method, params = {}, callback) {
     Check.typeOf.string('method', method);
-    return postMessageToApp({
+    return postMessage({
         type: 'callMethod',
         body: {
             method,
@@ -705,8 +729,9 @@ function callAppMethod(method, params = {}, callback) {
  * 接收android端向web端发送的消息
  * @param {string} json
  * @returns {void}
+ * @private
  */
-function onReceiveMessageFromApp(json) {
+function onReceiveMessage(json) {
     console.log("onReceiveMessageFromApp:", json);
     const message = JSON.parse(json);
     if (message.type === 'messageCallback' || message.type === 'methodCallback') {
@@ -715,11 +740,11 @@ function onReceiveMessageFromApp(json) {
             callback(message.body);
         delete messageCallbacks[message.id];
     } else {
-        onReceiveMessage.raiseEvent(message);
+        onMessage.raiseEvent(message);
     }
 }
 
-window.onBridgeMessage = onReceiveMessageFromApp;
+window.onBridgeMessage = onReceiveMessage;
 
-export { callAppMethod as callMethod, onReceiveMessage as onMessage, postMessageToApp as postMessage };
+export { callMethod, onMessage, postMessage };
 //# sourceMappingURL=jsbridge.esm.js.map

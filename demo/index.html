@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>demo</title>
+    <style>
+        html,
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: auto;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+        }
+        
+        #response-content {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="js/dat.gui.min.js"></script>
+    <script src="../jsbridge/jsbridge.js"></script>
+    <div id="response-content"></div>
+    <script>
+        const responseContent = document.getElementById("response-content");
+
+        const uiParams = {
+            type: 'type',
+            method: 'methodTest',
+            key1: 'key1',
+            value1: 'value1',
+            key2: 'key2',
+            value2: 'value2',
+            postMessage: function () {
+                const body = {};
+                body[uiParams.key1] = uiParams.value1;
+                body[uiParams.key2] = uiParams.value2;
+                jsbridge.postMessage({
+                    type: uiParams.type,
+                    body
+                });
+            },
+            callMethod: function () {
+                const params = {};
+                params[uiParams.key1] = uiParams.value1;
+                params[uiParams.key2] = uiParams.value2;
+                jsbridge.callMethod(uiParams.method, params, function (result) {
+                    console.log('onCallback:', result);
+                    responseContent.innerText = JSON.stringify(result);
+                });
+            },
+            text: 'text',
+            showToast: function () {
+                jsbridge.callMethod('showToast', {
+                    text: uiParams.text,
+                });
+            },
+            getAppInfo: function () {
+                jsbridge.callMethod('getAppInfo', {}, function (result) {
+                    console.log('getAppInfo result:', result);                    
+                    responseContent.innerText = JSON.stringify(result);
+                });
+            },
+            getDeviceInfo: function () {
+                jsbridge.callMethod('getDeviceInfo', {}, function (result) {
+                    console.log('getDeviceInfo result:', result);
+                    responseContent.innerText = JSON.stringify(result);
+                });
+            },
+            getDisplayInfo: function () {
+                jsbridge.callMethod('getDisplayInfo', {}, function (result) {
+                    console.log('getDisplayInfo result:', result);
+                    responseContent.innerText = JSON.stringify(result);
+                });
+            }
+        };
+
+        jsbridge.onMessage.addEventListener(function (message) {
+            console.log("onMessage:", message);
+        });
+
+        const gui = new dat.GUI();
+        gui.open();
+
+        gui.add(uiParams, 'type');
+        gui.add(uiParams, 'method');
+        gui.add(uiParams, 'key1');
+        gui.add(uiParams, 'value1');
+        gui.add(uiParams, 'key2');
+        gui.add(uiParams, 'value2');
+        gui.add(uiParams, 'postMessage');
+        gui.add(uiParams, 'callMethod');
+        gui.add(uiParams, 'text');
+        gui.add(uiParams, 'showToast');
+        gui.add(uiParams, 'getAppInfo');
+        gui.add(uiParams, 'getDeviceInfo');
+        gui.add(uiParams, 'getDisplayInfo');
+    </script>
+</body>
+
+</html>

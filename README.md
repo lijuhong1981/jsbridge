@@ -1,6 +1,8 @@
 # jsbridge
 用于AndroidApp端与Web端相互通讯的小插件
 
+API文档点击这里 [API documentation](API.md).
+
 ## 导入
 
 浏览器直接导入
@@ -60,8 +62,8 @@ jsbridge.postMessage({ type, body });
 /**
  * 调用方法
  * @param {string} method 方法名，必填项
- * @param {object|undefined} params 调用参数，键值对形式
- * @param {Function|undefined} callback 回调函数，可回应该方法的调用结果
+ * @param {object|undefined} params 调用参数，键值对形式，可不填
+ * @param {Function|undefined} callback 回调函数，回应该方法的调用结果，可不填
  * @returns {string|false} 发送的消息id，为false则说明调用未成功
  */
 jsbridge.callMethod(method, params = {}, (result) => {

@@ -1,6 +1,6 @@
 {
   "name": "@lijuhong1981/jsbridge",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "> TODO: description",
   "author": "lijuhong1981 <lijuhong@hotmail.com>",
   "homepage": "https://github.com/lijuhong1981/jsbridge#readme",
@@ -13,6 +13,8 @@
   },
   "scripts": {
     "build": "npx rollup -c",
+    "build-docs": "jsdoc2md -f index.js | replace-between --target API.md --token API",
+    "serve": "npx http-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -31,6 +33,9 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-terser": "^0.4.4",
+    "http-server": "^14.1.1",
+    "jsdoc-to-markdown": "^9.0.4",
+    "replace-between": "^0.0.8",
     "rollup": "^4.24.0",
     "rollup-plugin-cleanup": "^3.2.1"
   }
