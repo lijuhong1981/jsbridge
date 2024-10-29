@@ -1,4 +1,4 @@
-package com.webview.jsbridge;
+package android.webview.jsbridge;
 
 import org.json.JSONObject;
 

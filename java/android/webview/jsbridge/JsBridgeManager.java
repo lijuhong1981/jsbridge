@@ -1,6 +1,7 @@
-package com.webview.jsbridge;
+package android.webview.jsbridge;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -27,50 +28,48 @@ public class JsBridgeManager {
             }
         }
     };
+    private final Activity mActivity;
     private final WebView mWebView;
-    private final ArrayList<MessageHandler> mMessageHandlers = new ArrayList<>();
-    private final ArrayList<MethodHandler> mMethodHandlers = new ArrayList<>();
+    private final ArrayList<MessageReceiver> mMessageReceivers = new ArrayList<>();
+    private MethodHandler mMethodHandler;
 
     @SuppressLint("SetJavaScriptEnabled")
-    public JsBridgeManager(@NonNull WebView webView) {
+    public JsBridgeManager(@NonNull Activity activity,@NonNull WebView webView) {
+        mActivity = activity;
         mWebView = webView;
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.addJavascriptInterface(new AndroidInterface(), "jsbridgeInterface");
+        mMethodHandler = new DefaultMethodHandler(activity);
     }
 
-    public void registerMessageReceiver(@NonNull MessageHandler handler) {
-        if (!mMessageHandlers.contains(handler))
-            mMessageHandlers.add(handler);
+    public void registerMessageReceiver(@NonNull MessageReceiver handler) {
+        if (!mMessageReceivers.contains(handler))
+            mMessageReceivers.add(handler);
     }
 
-    public void unregisterMessageReceiver(@NonNull MessageHandler handler) {
-        mMessageHandlers.remove(handler);
+    public void unregisterMessageReceiver(@NonNull MessageReceiver handler) {
+        mMessageReceivers.remove(handler);
     }
 
-    private void notifyMessageHandlers(@NonNull Message message) {
+    private void notifyMessageReceivers(@NonNull Message message) {
         MessageCallbackHandler callbackHandler = new MessageCallbackHandler(this, message.id);
-        for (int i = 0, size = mMessageHandlers.size(); i < size; i++) {
-            mMessageHandlers.get(i).onMessage(message, callbackHandler);
+        for (int i = 0, size = mMessageReceivers.size(); i < size; i++) {
+            mMessageReceivers.get(i).onMessage(message, callbackHandler);
         }
     }
 
-    public void registerMethodHandler(@NonNull MethodHandler handler) {
-        if (!mMethodHandlers.contains(handler))
-            mMethodHandlers.add(handler);
+    public void setMethodHandler(@NonNull MethodHandler handler) {
+        if (mMethodHandler != handler)
+            mMethodHandler = handler;
     }
 
-    public void unregisterMethodHandler(@NonNull MethodHandler handler) {
-        mMethodHandlers.remove(handler);
-    }
-
-    private void notifyMethodHandlers(@NonNull Message message) {
+    private void notifyMethodHandler(@NonNull Message message) {
         try {
             String method = message.body.getString("method");
             JSONObject params = message.body.getJSONObject("params");
             MethodCallbackHandler callbackHandler = new MethodCallbackHandler(this, message.id);
-            for (int i = 0, size = mMethodHandlers.size(); i < size; i++) {
-                mMethodHandlers.get(i).onMethod(method, params, callbackHandler);
-            }
+            if (mMethodHandler != null)
+                mMethodHandler.onMethod(method, params, callbackHandler);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -100,9 +99,9 @@ public class JsBridgeManager {
             try {
                 Message message = Message.fromJson(jsonString);
                 if (message.type.equals("callMethod"))
-                    notifyMethodHandlers(message);
+                    notifyMethodHandler(message);
                 else
-                    notifyMessageHandlers(message);
+                    notifyMessageReceivers(message);
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }

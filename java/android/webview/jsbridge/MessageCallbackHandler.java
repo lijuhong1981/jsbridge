@@ -1,4 +1,4 @@
-package com.webview.jsbridge;
+package android.webview.jsbridge;
 
 import android.util.Log;
 
@@ -20,7 +20,7 @@ public class MessageCallbackHandler {
         return "messageCallback";
     }
 
-    public void doCallback(@NonNull JSONObject result) {
+    public void doCallback(@NonNull JSONObject responseBody) {
         if (mCallbacked) {
             Log.w(JsBridgeManager.TAG, "The callback has executed.");
             return;
@@ -28,7 +28,8 @@ public class MessageCallbackHandler {
         Message message = new Message();
         message.id = mCallbackId;
         message.type = getCallbackMsgType();
-        message.body = result;
+        message.body = responseBody;
         mManager.postMessage(message);
+        mCallbacked = true;
     }
 }
