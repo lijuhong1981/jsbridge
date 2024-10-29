@@ -99,7 +99,7 @@ onMessage.addEventListener((message) => {});
 | Name | Type | Description |
 | --- | --- | --- |
 | success | <code>boolean</code> | 是否执行成功 |
-| errorInfo | <code>string</code> | 执行失败的错误信息 |
+| error | <code>object</code> | 执行失败的错误信息 |
 | data | <code>object</code> | 执行成功的返回数据 |
 
 <a name="MethodCallback"></a>

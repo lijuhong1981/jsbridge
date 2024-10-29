@@ -15,10 +15,11 @@
             height: 100%;
             background-color: #ffffff;
         }
-        
+
         #response-content {
             width: 100%;
             height: 100%;
+            padding: 5em;
         }
     </style>
 </head>
@@ -26,7 +27,7 @@
 <body>
     <script src="js/dat.gui.min.js"></script>
     <script src="../jsbridge/jsbridge.js"></script>
-    <div id="response-content"></div>
+    <pre id="response-content"></pre>
     <script>
         const responseContent = document.getElementById("response-content");
 
@@ -37,15 +38,15 @@
             value1: 'value1',
             key2: 'key2',
             value2: 'value2',
-            postMessage: function () {
-                const body = {};
-                body[uiParams.key1] = uiParams.value1;
-                body[uiParams.key2] = uiParams.value2;
-                jsbridge.postMessage({
-                    type: uiParams.type,
-                    body
-                });
-            },
+            // postMessage: function () {
+            //     const body = {};
+            //     body[uiParams.key1] = uiParams.value1;
+            //     body[uiParams.key2] = uiParams.value2;
+            //     jsbridge.postMessage({
+            //         type: uiParams.type,
+            //         body
+            //     });
+            // },
             callMethod: function () {
                 const params = {};
                 params[uiParams.key1] = uiParams.value1;
@@ -63,20 +64,37 @@
             },
             getAppInfo: function () {
                 jsbridge.callMethod('getAppInfo', {}, function (result) {
-                    console.log('getAppInfo result:', result);                    
-                    responseContent.innerText = JSON.stringify(result);
+                    console.log('getAppInfo result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
             getDeviceInfo: function () {
                 jsbridge.callMethod('getDeviceInfo', {}, function (result) {
                     console.log('getDeviceInfo result:', result);
-                    responseContent.innerText = JSON.stringify(result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
             getDisplayInfo: function () {
                 jsbridge.callMethod('getDisplayInfo', {}, function (result) {
                     console.log('getDisplayInfo result:', result);
-                    responseContent.innerText = JSON.stringify(result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                });
+            },
+            phoneNumber: "10086",
+            dialPhone: function () {
+                jsbridge.callMethod('dialPhone', {
+                    phoneNumber: uiParams.phoneNumber,
+                });
+            },
+            callPhone: function () {
+                jsbridge.callMethod('callPhone', {
+                    phoneNumber: uiParams.phoneNumber,
+                });
+            },
+            takePhoto: function () {
+                jsbridge.callMethod('takePhoto', {}, function (result) {
+                    console.log('takePhoto result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             }
         };
@@ -94,13 +112,16 @@
         gui.add(uiParams, 'value1');
         gui.add(uiParams, 'key2');
         gui.add(uiParams, 'value2');
-        gui.add(uiParams, 'postMessage');
+        // gui.add(uiParams, 'postMessage');
         gui.add(uiParams, 'callMethod');
         gui.add(uiParams, 'text');
         gui.add(uiParams, 'showToast');
         gui.add(uiParams, 'getAppInfo');
         gui.add(uiParams, 'getDeviceInfo');
         gui.add(uiParams, 'getDisplayInfo');
+        gui.add(uiParams, 'dialPhone');
+        gui.add(uiParams, 'callPhone');
+        gui.add(uiParams, 'takePhoto');
     </script>
 </body>
 

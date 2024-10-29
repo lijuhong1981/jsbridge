@@ -23,7 +23,7 @@ const onMessage = new EventSubscriber();
  * 方法执行结果对象定义
  * @typedef {object} ResultData
  * @property {boolean} success 是否执行成功
- * @property {string} errorInfo 执行失败的错误信息 
+ * @property {object} error 执行失败的错误信息 
  * @property {object} data 执行成功的返回数据
  */
 
