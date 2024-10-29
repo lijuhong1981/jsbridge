@@ -26,13 +26,13 @@ Details about the classes, methods, and properties provided by pcircs.
 ## Typedefs
 
 <dl>
-<dt><a href="#OnMessageCallback">OnMessageCallback</a> : <code>function</code></dt>
+<dt><a href="#MessageCallback">MessageCallback</a> : <code>function</code></dt>
 <dd><p>消息回调通知</p>
 </dd>
 <dt><a href="#ResultData">ResultData</a> : <code>object</code></dt>
 <dd><p>方法执行结果对象定义</p>
 </dd>
-<dt><a href="#OnMethodCallback">OnMethodCallback</a> : <code>function</code></dt>
+<dt><a href="#MethodCallback">MethodCallback</a> : <code>function</code></dt>
 <dd><p>方法回调通知</p>
 </dd>
 </dl>
@@ -61,7 +61,7 @@ onMessage.addEventListener((message) => {});
 | message.type | <code>string</code> | 消息类型，必填项 |
 | message.id | <code>string</code> \| <code>undefined</code> | 消息id，不填则由程序自动生成 |
 | message.body | <code>object</code> \| <code>undefined</code> | 消息体内容对象 |
-| message.callback | [<code>OnMessageCallback</code>](#OnMessageCallback) \| <code>undefined</code> | 消息回调函数，如果消息有回应，则通过该函数回调，可不填 |
+| message.callback | [<code>MessageCallback</code>](#MessageCallback) \| <code>undefined</code> | 消息回调函数，如果消息有回应，则通过该函数回调，可不填 |
 
 <a name="callMethod"></a>
 
@@ -75,11 +75,11 @@ onMessage.addEventListener((message) => {});
 | --- | --- | --- |
 | method | <code>string</code> | 方法名，必填项 |
 | params | <code>object</code> \| <code>undefined</code> | 调用参数，键值对形式，可不填 |
-| callback | [<code>OnMethodCallback</code>](#OnMethodCallback) \| <code>undefined</code> | 回调函数，回应该方法的调用结果，可不填 |
+| callback | [<code>MethodCallback</code>](#MethodCallback) \| <code>undefined</code> | 回调函数，回应该方法的调用结果，可不填 |
 
-<a name="OnMessageCallback"></a>
+<a name="MessageCallback"></a>
 
-## OnMessageCallback : <code>function</code>
+## MessageCallback : <code>function</code>
 消息回调通知
 
 **Kind**: global typedef  
@@ -100,11 +100,11 @@ onMessage.addEventListener((message) => {});
 | --- | --- | --- |
 | success | <code>boolean</code> | 是否执行成功 |
 | errorInfo | <code>string</code> | 执行失败的错误信息 |
-| data | <code>object</code> | 执行成功返回数据 |
+| data | <code>object</code> | 执行成功的返回数据 |
 
-<a name="OnMethodCallback"></a>
+<a name="MethodCallback"></a>
 
-## OnMethodCallback : <code>function</code>
+## MethodCallback : <code>function</code>
 方法回调通知
 
 **Kind**: global typedef  
