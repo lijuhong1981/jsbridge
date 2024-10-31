@@ -112,19 +112,19 @@
             },
             phoneNumber: "10086",
             dialPhone: function () {
-                // 打开电话拨打界面，因为并不直接拨打电话，故不需要APP权限支持
+                // 打开电话拨打界面，因为并不是直接拨打电话，故不需要APP权限支持
                 jsbridge.callMethod('dialPhone', {
-                    phoneNumber: uiParams.phoneNumber,
+                    phoneNumber: uiParams.phoneNumber, //电话号码
                 });
             },
             callPhone: function () {
                 // 拨打电话，需要APP权限支持
                 jsbridge.callMethod('callPhone', {
-                    phoneNumber: uiParams.phoneNumber,
+                    phoneNumber: uiParams.phoneNumber, //电话号码
                 });
             },
             takePhoto: function () {
-                // 调用相机拍照，成功后会返回一个图片url，image.src可直接使用
+                // 调用相机拍照，需要APP权限支持，成功后会返回一个图片url，image.src可直接使用
                 jsbridge.callMethod('takePhoto', {}, function (result) {
                     console.log('takePhoto result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
@@ -137,7 +137,7 @@
             exitApp: function () {
                 // 退出APP
                 jsbridge.callMethod('exitApp', {
-                    force: uiParams.force,
+                    force: uiParams.force, //是否强制退出，不推荐使用true
                 });
             }
         };
