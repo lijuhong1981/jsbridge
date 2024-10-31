@@ -11,6 +11,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": ["demo", "jsbridge", "API.md", "index.js"],
   "scripts": {
     "build": "npx rollup -c",
     "build-docs": "jsdoc2md -f index.js | replace-between --target API.md --token API",
