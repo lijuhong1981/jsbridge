@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
+import android.os.Build;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
@@ -25,7 +27,6 @@ import androidx.annotation.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -36,30 +37,73 @@ public class WebViewBridgeManager {
     public static final String FILE_LOCAL_HOST = "file.local";
 
     private final Activity mActivity;
-    private final WebView mWebView;
+    public final WebView webView;
+    public final WebSettings webSettings;
     private final ArrayList<MessageReceiver> mMessageReceivers = new ArrayList<>();
     private MethodHandler mMethodHandler;
 
     @SuppressLint("SetJavaScriptEnabled")
-    public WebViewBridgeManager(@NonNull Activity activity, @NonNull WebView webView) {
+    public WebViewBridgeManager(@NonNull Activity activity, @NonNull WebView webView, @Nullable WebViewSettingsOptions options) {
         mActivity = activity;
-        mWebView = webView;
-        WebSettings webSettings = mWebView.getSettings();
-        webSettings.setAllowFileAccess(true);
-        webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
-        webSettings.setSupportZoom(true);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setSupportMultipleWindows(false);
-        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setGeolocationEnabled(true);
-        webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        this.webView = webView;
+        if (options == null)
+            options = new WebViewSettingsOptions();
+        webSettings = this.webView.getSettings();
+        webSettings.setAllowContentAccess(options.allowContentAccess);
+        webSettings.setAllowFileAccess(options.allowFileAccess);
+        webSettings.setBlockNetworkImage(options.blockNetworkImage);
+        webSettings.setBlockNetworkLoads(options.blockNetworkLoads);
+        webSettings.setBuiltInZoomControls(options.builtInZoomControls);
+        webSettings.setCacheMode(options.cacheMode);
+        webSettings.setDisplayZoomControls(options.displayZoomControls);
+        webSettings.setDomStorageEnabled(options.domStorageEnabled);
+        webSettings.setGeolocationEnabled(options.geolocationEnabled);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(options.javaScriptCanOpenWindowsAutomatically);
+        webSettings.setLayoutAlgorithm(options.layoutAlgorithm);
+        webSettings.setLoadsImagesAutomatically(options.loadsImagesAutomatically);
+        webSettings.setLoadWithOverviewMode(options.loadWithOverviewMode);
+        webSettings.setMediaPlaybackRequiresUserGesture(options.mediaPlaybackRequiresUserGesture);
+        webSettings.setMixedContentMode(options.mixedContentMode);
+        webSettings.setNeedInitialFocus(options.needInitialFocus);
+        webSettings.setOffscreenPreRaster(options.offscreenPreRaster);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            webSettings.setSafeBrowsingEnabled(options.safeBrowsingEnabled);
+        webSettings.setSupportMultipleWindows(options.supportMultipleWindows);
+        webSettings.setSupportZoom(options.supportZoom);
+        webSettings.setUseWideViewPort(options.useWideViewPort);
+        if (!TextUtils.isEmpty(options.defaultTextEncodingName))
+            webSettings.setDefaultTextEncodingName(options.defaultTextEncodingName);
+        if (options.disabledActionModeMenuItems >= 0)
+            webSettings.setDisabledActionModeMenuItems(options.disabledActionModeMenuItems);
+        if (!TextUtils.isEmpty(options.cursiveFontFamily))
+            webSettings.setCursiveFontFamily(options.cursiveFontFamily);
+        if (!TextUtils.isEmpty(options.fantasyFontFamily))
+            webSettings.setFantasyFontFamily(options.fantasyFontFamily);
+        if (!TextUtils.isEmpty(options.fixedFontFamily))
+            webSettings.setFixedFontFamily(options.fixedFontFamily);
+        if (!TextUtils.isEmpty(options.sansSerifFontFamily))
+            webSettings.setSansSerifFontFamily(options.sansSerifFontFamily);
+        if (!TextUtils.isEmpty(options.serifFontFamily))
+            webSettings.setSerifFontFamily(options.serifFontFamily);
+        if (!TextUtils.isEmpty(options.standardFontFamily))
+            webSettings.setStandardFontFamily(options.standardFontFamily);
+        if (options.defaultFixedFontSize > 0)
+            webSettings.setDefaultFixedFontSize(options.defaultFixedFontSize);
+        if (options.defaultFontSize > 0)
+            webSettings.setDefaultFontSize(options.defaultFontSize);
+        if (options.minimumFontSize > 0)
+            webSettings.setMinimumFontSize(options.minimumFontSize);
+        if (options.minimumLogicalFontSize > 0)
+            webSettings.setMinimumLogicalFontSize(options.minimumLogicalFontSize);
+        if (options.textZoom > 0)
+            webSettings.setTextZoom(options.textZoom);
+        if (!TextUtils.isEmpty(options.userAgentString))
+            webSettings.setUserAgentString(options.userAgentString);
+
         webSettings.setJavaScriptEnabled(true);
-        mWebView.addJavascriptInterface(new AndroidInterface(), "jsbridgeInterface");
-        mWebView.setWebViewClient(new MyWebViewClient());
-        mWebView.setWebChromeClient(new MyWebChromeClient());
+        this.webView.addJavascriptInterface(new AndroidInterface(), "jsbridgeInterface");
+        this.webView.setWebViewClient(new MyWebViewClient());
+        this.webView.setWebChromeClient(new MyWebChromeClient());
         mMethodHandler = new DefaultMethodHandler(activity);
     }
 
@@ -84,9 +128,13 @@ public class WebViewBridgeManager {
         }
     }
 
-    public void setMethodHandler(@NonNull MethodHandler handler) {
+    public void setMethodHandler(@Nullable MethodHandler handler) {
         if (mMethodHandler != handler)
             mMethodHandler = handler;
+    }
+
+    public MethodHandler getMethodHandler() {
+        return mMethodHandler;
     }
 
     private void notifyMethodHandler(@NonNull Message message) {
@@ -106,7 +154,7 @@ public class WebViewBridgeManager {
             String jsonString = jsonObject.toString();
             Log.d(TAG, "postMessageToWeb: " + jsonString);
             String script = String.format("onBridgeMessage('%s');", jsonString);
-            mWebView.evaluateJavascript(script, null);
+            webView.evaluateJavascript(script, null);
         });
     }
 
