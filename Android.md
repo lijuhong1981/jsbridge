@@ -14,7 +14,10 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_webview);
     WebView webView = findViewById(R.id.webView);
-    mManager = new WebViewBridgeManager(this, webView, null);
+    // WebSettingsOptions是对WebView下WebSettings的配置项，WebViewBridgeManager会按照WebSettingsOptions中的参数配置设置WebSettings
+    WebSettingsOptions options = new WebSettingsOptions();
+    ...
+    mManager = new WebViewBridgeManager(this, webView, options);
 }
 ```
 
