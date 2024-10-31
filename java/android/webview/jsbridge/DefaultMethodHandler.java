@@ -117,7 +117,7 @@ public class DefaultMethodHandler implements MethodHandler {
         }
     }
 
-    private DialogInterface.OnClickListener getClickListener(String positiveButtonLabel, String negativeButtonLabel, String neutralButtonLabel, MethodCallbackHandler callbackHandler) {
+    private DialogInterface.OnClickListener getClickListener(String positiveButtonName, String negativeButtonName, String neutralButtonName, MethodCallbackHandler callbackHandler) {
         return (dialog, which) -> {
             dialog.dismiss();
             try {
@@ -125,15 +125,15 @@ public class DefaultMethodHandler implements MethodHandler {
                 switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:
                         resultData.put("clickButton", "positive");
-                        resultData.put("clickButtonLabel", positiveButtonLabel);
+                        resultData.put("clickButtonName", positiveButtonName);
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
                         resultData.put("clickButton", "negative");
-                        resultData.put("clickButtonLabel", negativeButtonLabel);
+                        resultData.put("clickButtonName", negativeButtonName);
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:
                         resultData.put("clickButton", "neutral");
-                        resultData.put("clickButtonLabel", neutralButtonLabel);
+                        resultData.put("clickButtonName", neutralButtonName);
                         break;
                 }
                 resultData.put("clickButtonIndex", which);
@@ -161,9 +161,9 @@ public class DefaultMethodHandler implements MethodHandler {
                 showPositiveButton = params.getBoolean("showPositiveButton");
             } catch (JSONException ignored) {
             }
-            String positiveButtonLabel = "确定";
+            String positiveButtonName = "确定";
             try {
-                positiveButtonLabel = params.getString("positiveButtonLabel");
+                positiveButtonName = params.getString("positiveButtonName");
             } catch (JSONException ignored) {
             }
             boolean showNegativeButton = false;
@@ -171,9 +171,9 @@ public class DefaultMethodHandler implements MethodHandler {
                 showNegativeButton = params.getBoolean("showNegativeButton");
             } catch (JSONException ignored) {
             }
-            String negativeButtonLabel = "取消";
+            String negativeButtonName = "取消";
             try {
-                negativeButtonLabel = params.getString("negativeButtonLabel");
+                negativeButtonName = params.getString("negativeButtonName");
             } catch (JSONException ignored) {
             }
             boolean showNeutralButton = false;
@@ -181,9 +181,9 @@ public class DefaultMethodHandler implements MethodHandler {
                 showNeutralButton = params.getBoolean("showNeutralButton");
             } catch (JSONException ignored) {
             }
-            String neutralButtonLabel = "中立";
+            String neutralButtonName = "中立";
             try {
-                neutralButtonLabel = params.getString("neutralButtonLabel");
+                neutralButtonName = params.getString("neutralButtonName");
             } catch (JSONException ignored) {
             }
             boolean cancelable = true;
@@ -194,10 +194,10 @@ public class DefaultMethodHandler implements MethodHandler {
             AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
             if (title != null) builder.setTitle(title);
             if (content != null) builder.setMessage(content);
-            DialogInterface.OnClickListener clickListener = getClickListener(positiveButtonLabel, negativeButtonLabel, neutralButtonLabel, callbackHandler);
-            if (showPositiveButton) builder.setPositiveButton(positiveButtonLabel, clickListener);
-            if (showNegativeButton) builder.setNegativeButton(negativeButtonLabel, clickListener);
-            if (showNeutralButton) builder.setNeutralButton(neutralButtonLabel, clickListener);
+            DialogInterface.OnClickListener clickListener = getClickListener(positiveButtonName, negativeButtonName, neutralButtonName, callbackHandler);
+            if (showPositiveButton) builder.setPositiveButton(positiveButtonName, clickListener);
+            if (showNegativeButton) builder.setNegativeButton(negativeButtonName, clickListener);
+            if (showNeutralButton) builder.setNeutralButton(neutralButtonName, clickListener);
             if (cancelable) {
                 builder.setCancelable(true);
                 builder.setOnCancelListener(dialog -> {

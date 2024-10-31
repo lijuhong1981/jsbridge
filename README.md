@@ -56,6 +56,16 @@ import * as jsbridge from '@lijuhong1981/jsbridge';
 jsbridge.postMessage({ type, body }, callback);
 ```
 
+### 接收App端发送的消息
+
+```js
+// 注册消息接收
+jsbridge.onMessage.addEventListener((message) => {
+    console.log("onMessage:", message);
+    // TODO
+});
+```
+
 ### 调用App端方法
 
 ```js
@@ -71,17 +81,9 @@ jsbridge.callMethod(method, params = {}, (result) => {
 });
 ```
 
-### 接收App端发送的消息
+App端已实现部分可调用的方法，参见[demo页面](demo/index.html)
 
-```js
-// 注册消息接收
-jsbridge.onMessage.addEventListener((message) => {
-    console.log("onMessage:", message);
-    // TODO
-});
-```
-
-## 启动页面demo
+## 启动demo页面
 
 ```bash
 npm run serve

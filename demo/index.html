@@ -67,39 +67,43 @@
             title: "title",
             content: "content",
             showPositiveButton: true,
-            positiveButtonLabel: "确定",
+            positiveButtonName: "确定",
             showNegativeButton: false,
-            negativeButtonLabel: "取消",
+            negativeButtonName: "取消",
             showNeutralButton: false,
-            neutralButtonLabel: "中立",
+            neutralButtonName: "中立",
             showAlertDialog: function () {
+                // 显示对话框
                 jsbridge.callMethod('showAlertDialog', {
-                    title: uiParams.title,
-                    content: uiParams.content,
-                    showPositiveButton: uiParams.showPositiveButton,
-                    positiveButtonLabel: uiParams.positiveButtonLabel,
-                    showNegativeButton: uiParams.showNegativeButton,
-                    negativeButtonLabel: uiParams.negativeButtonLabel,
-                    showNeutralButton: uiParams.showNeutralButton,
-                    neutralButtonLabel: uiParams.neutralButtonLabel,
+                    title: uiParams.title, //对话框标题
+                    content: uiParams.content, //对话框内容
+                    showPositiveButton: uiParams.showPositiveButton, //是否显示确定按钮
+                    positiveButtonName: uiParams.positiveButtonName, //确定按钮名称
+                    showNegativeButton: uiParams.showNegativeButton, //是否显示否定按钮
+                    negativeButtonName: uiParams.negativeButtonName, //否定按钮名称
+                    showNeutralButton: uiParams.showNeutralButton, //是否显示中立按钮
+                    neutralButtonName: uiParams.neutralButtonName, //中立按钮名称
                 }, function (result) {
                     console.log('showAlertDialog result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
             getAppInfo: function () {
+                // 获取APP信息
                 jsbridge.callMethod('getAppInfo', {}, function (result) {
                     console.log('getAppInfo result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
             getDeviceInfo: function () {
+                // 获取设备信息
                 jsbridge.callMethod('getDeviceInfo', {}, function (result) {
                     console.log('getDeviceInfo result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
             getDisplayInfo: function () {
+                // 获取屏幕信息
                 jsbridge.callMethod('getDisplayInfo', {}, function (result) {
                     console.log('getDisplayInfo result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
@@ -107,16 +111,19 @@
             },
             phoneNumber: "10086",
             dialPhone: function () {
+                // 打开电话拨打界面，因为并不直接拨打电话，故不需要APP权限支持
                 jsbridge.callMethod('dialPhone', {
                     phoneNumber: uiParams.phoneNumber,
                 });
             },
             callPhone: function () {
+                // 拨打电话，需要APP权限支持
                 jsbridge.callMethod('callPhone', {
                     phoneNumber: uiParams.phoneNumber,
                 });
             },
             takePhoto: function () {
+                // 调用相机拍照，成功后会返回一个图片url，image.src可直接使用
                 jsbridge.callMethod('takePhoto', {}, function (result) {
                     console.log('takePhoto result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
@@ -127,6 +134,7 @@
             },
             force: false,
             exitApp: function () {
+                // 退出APP
                 jsbridge.callMethod('exitApp', {
                     force: uiParams.force,
                 });
@@ -151,11 +159,11 @@
         gui.add(uiParams, 'text');
         gui.add(uiParams, 'showToast');
         gui.add(uiParams, 'showPositiveButton');
-        gui.add(uiParams, 'positiveButtonLabel');
+        gui.add(uiParams, 'positiveButtonName');
         gui.add(uiParams, 'showNegativeButton');
-        gui.add(uiParams, 'negativeButtonLabel');
+        gui.add(uiParams, 'negativeButtonName');
         gui.add(uiParams, 'showNeutralButton');
-        gui.add(uiParams, 'neutralButtonLabel');
+        gui.add(uiParams, 'neutralButtonName');
         gui.add(uiParams, "showAlertDialog");
         gui.add(uiParams, 'getAppInfo');
         gui.add(uiParams, 'getDeviceInfo');
