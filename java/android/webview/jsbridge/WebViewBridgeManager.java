@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.UUID;
 
 public class WebViewBridgeManager {
     public static final String TAG = WebViewBridgeManager.class.getSimpleName();
@@ -161,6 +162,10 @@ public class WebViewBridgeManager {
     public void postMessage(@NonNull Message message) {
         try {
             JSONObject jsonObject = new JSONObject();
+            if (TextUtils.isEmpty(message.id)) {
+                UUID uuid = UUID.randomUUID();
+                message.id = uuid.toString();
+            }
             jsonObject.put("id", message.id);
             jsonObject.put("type", message.type);
             jsonObject.put("body", message.body);
