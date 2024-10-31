@@ -81,8 +81,10 @@ jsbridge.onMessage.addEventListener((message) => {
 });
 ```
 
-## 启动demo
+## 启动页面demo
 
 ```bash
 npm run serve
 ```
+
+## Android端使用点击这里 [Android](Android.md).
