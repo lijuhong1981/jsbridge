@@ -124,6 +124,12 @@
                         imagePreview.src = result.data.url;
                     }
                 });
+            },
+            force: false,
+            exitApp: function () {
+                jsbridge.callMethod('exitApp', {
+                    force: uiParams.force,
+                });
             }
         };
 
@@ -157,6 +163,8 @@
         gui.add(uiParams, 'dialPhone');
         gui.add(uiParams, 'callPhone');
         gui.add(uiParams, 'takePhoto');
+        gui.add(uiParams, 'force');
+        gui.add(uiParams, 'exitApp');
     </script>
 </body>
 
