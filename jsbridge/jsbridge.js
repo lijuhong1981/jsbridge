@@ -682,10 +682,10 @@
    * @param {string} message.type 消息类型，必填项
    * @param {string|undefined} message.id 消息id，不填则由程序自动生成
    * @param {object|undefined} message.body 消息体内容对象
-   * @param {MessageCallback|undefined} message.callback 消息回调函数，如果消息有回应，则通过该函数回调，可不填
+   * @param {MessageCallback|undefined} callback 消息回调函数，如果消息有回应，则通过该函数回调，可不填
    * @returns {string|false} 发送的消息id，为false则说明发送未成功
    */
-  function postMessage(message) {
+  function postMessage(message, callback) {
       Check.defined('message', message);
       Check.typeOf.string('type', message.type);
       if (!window.jsbridgeInterface) {
@@ -700,13 +700,9 @@
           message.id = v4();
       if (!message.body)
           message.body = {};
-      if (typeof message.callback === 'function')
-          messageCallbacks[message.id] = message.callback;
-      const json = JSON.stringify({
-          type: message.type,
-          id: message.id,
-          body: message.body,
-      });
+      if (typeof callback === 'function')
+          messageCallbacks[message.id] = callback;
+      const json = JSON.stringify(message);
       console.log('postMessageToApp:', json);
       window.jsbridgeInterface.onBridgeMessage(json);
       return message.id;
@@ -726,9 +722,8 @@
           body: {
               method,
               params,
-          },
-          callback,
-      });
+          }
+      }, callback);
   }
 
   /**

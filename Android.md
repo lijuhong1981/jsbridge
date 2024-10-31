@@ -34,11 +34,9 @@ protected void onActivityResult(int requestCode, int resultCode, @Nullable Inten
 ## 向Web端发送消息
 
 ```java
-JSONObject body = new JSONObject();
+JSONObject body = new JSONObject(); //消息体内容，JSON对象
 ...
-Message msg = new Message();
-msg.type = "type"; //消息类型
-msg.body = body; //消息体内容，JSON对象
+Message msg = Message.obtainMessage("type", body);
 mManager.postMessage(msg);
 ```
 

@@ -40,15 +40,15 @@
             value1: 'value1',
             key2: 'key2',
             value2: 'value2',
-            // postMessage: function () {
-            //     const body = {};
-            //     body[uiParams.key1] = uiParams.value1;
-            //     body[uiParams.key2] = uiParams.value2;
-            //     jsbridge.postMessage({
-            //         type: uiParams.type,
-            //         body
-            //     });
-            // },
+            postMessage: function () {
+                const body = {};
+                body[uiParams.key1] = uiParams.value1;
+                body[uiParams.key2] = uiParams.value2;
+                jsbridge.postMessage({
+                    type: uiParams.type,
+                    body
+                });
+            },
             callMethod: function () {
                 const params = {};
                 params[uiParams.key1] = uiParams.value1;

@@ -50,10 +50,10 @@ import * as jsbridge from '@lijuhong1981/jsbridge';
  * @param {string} message.type 消息类型，必填项
  * @param {string|undefined} message.id 消息id，不填则由程序自动生成
  * @param {object|undefined} message.body 消息体内容对象
- * @param {Function|undefined} message.callback 消息回调函数，如果消息有回应，则通过该函数回调，可不填
+ * @param {Function|undefined} callback 消息回调函数，如果消息有回应，则通过该函数回调，可不填
  * @returns {string|false} 发送的消息id，为false则说明发送未成功
  */
-jsbridge.postMessage({ type, body });
+jsbridge.postMessage({ type, body }, callback);
 ```
 
 ### 调用App端方法

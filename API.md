@@ -15,7 +15,7 @@ Details about the classes, methods, and properties provided by pcircs.
 ## Functions
 
 <dl>
-<dt><a href="#postMessage">postMessage(message)</a> ⇒ <code>string</code> | <code>false</code></dt>
+<dt><a href="#postMessage">postMessage(message, callback)</a> ⇒ <code>string</code> | <code>false</code></dt>
 <dd><p>向app端发送消息</p>
 </dd>
 <dt><a href="#callMethod">callMethod(method, params, callback)</a> ⇒ <code>string</code> | <code>false</code></dt>
@@ -49,7 +49,7 @@ onMessage.addEventListener((message) => {});
 ```
 <a name="postMessage"></a>
 
-## postMessage(message) ⇒ <code>string</code> \| <code>false</code>
+## postMessage(message, callback) ⇒ <code>string</code> \| <code>false</code>
 向app端发送消息
 
 **Kind**: global function  
@@ -61,7 +61,7 @@ onMessage.addEventListener((message) => {});
 | message.type | <code>string</code> | 消息类型，必填项 |
 | message.id | <code>string</code> \| <code>undefined</code> | 消息id，不填则由程序自动生成 |
 | message.body | <code>object</code> \| <code>undefined</code> | 消息体内容对象 |
-| message.callback | [<code>MessageCallback</code>](#MessageCallback) \| <code>undefined</code> | 消息回调函数，如果消息有回应，则通过该函数回调，可不填 |
+| callback | [<code>MessageCallback</code>](#MessageCallback) \| <code>undefined</code> | 消息回调函数，如果消息有回应，则通过该函数回调，可不填 |
 
 <a name="callMethod"></a>
 
