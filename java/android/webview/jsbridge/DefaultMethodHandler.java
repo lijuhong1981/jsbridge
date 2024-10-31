@@ -68,6 +68,9 @@ public class DefaultMethodHandler implements MethodHandler {
             case "takePhoto":
                 takePhoto(params, callbackHandler);
                 break;
+            case "exitApp":
+                exitApp(params, callbackHandler);
+                break;
             default:
                 callbackHandler.doErrorCallback(new NoSuchMethodException("Not found the " + method + " method."));
                 break;
@@ -318,15 +321,6 @@ public class DefaultMethodHandler implements MethodHandler {
         @SuppressLint("SimpleDateFormat")
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date(System.currentTimeMillis()));
         String imageFileName = "JPEG_" + timeStamp + ".jpg";
-//        File storageDir = mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-//        assert storageDir != null;
-//        if (!storageDir.exists()) {
-//            storageDir.mkdirs();
-//        }
-//        File imageFile = new File(mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES), imageFileName);
-//        imageFile.createNewFile();
-//        imageFile.setWritable(true);
-//        return imageFile;
         return new File(mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES), imageFileName);
     }
 
@@ -347,5 +341,17 @@ public class DefaultMethodHandler implements MethodHandler {
                 Log.e(WebViewBridgeManager.TAG, "takePhoto error:", e);
             }
         });
+    }
+
+    public void exitApp(JSONObject params, MethodCallbackHandler callbackHandler) {
+        boolean force = false;
+        try {
+            force = params.getBoolean("force");
+        } catch (JSONException ignored) {
+        }
+        if (force)
+            System.exit(0);
+        else
+            mActivity.finishAffinity();
     }
 }
