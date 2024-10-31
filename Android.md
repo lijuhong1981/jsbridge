@@ -88,7 +88,7 @@ mManager.setMethodHandler(new MethodHandler() {
 });
 ```
 
-代码中已内置了一个DefaultMethodHandler类，实现了一些常用的方法，WebViewBridgeManager初始化时会默认使用该类，也可继续该类后扩展
+代码中已内置了一个DefaultMethodHandler类，实现了一些常用的方法，WebViewBridgeManager初始化时会默认使用该类，也可继承该类后扩展
 
 ```java
 mManager.setMethodHandler(new DefaultMethodHandler(WebViewActivity.this){
