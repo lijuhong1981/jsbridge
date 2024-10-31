@@ -43,11 +43,11 @@ public class WebViewBridgeManager {
     private MethodHandler mMethodHandler;
 
     @SuppressLint("SetJavaScriptEnabled")
-    public WebViewBridgeManager(@NonNull Activity activity, @NonNull WebView webView, @Nullable WebViewSettingsOptions options) {
+    public WebViewBridgeManager(@NonNull Activity activity, @NonNull WebView webView, @Nullable WebSettingsOptions options) {
         mActivity = activity;
         this.webView = webView;
         if (options == null)
-            options = new WebViewSettingsOptions();
+            options = new WebSettingsOptions();
         webSettings = this.webView.getSettings();
         webSettings.setAllowContentAccess(options.allowContentAccess);
         webSettings.setAllowFileAccess(options.allowFileAccess);
