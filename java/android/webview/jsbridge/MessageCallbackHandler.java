@@ -7,11 +7,11 @@ import androidx.annotation.NonNull;
 import org.json.JSONObject;
 
 public class MessageCallbackHandler {
-    private final JsBridgeManager mManager;
+    private final WebViewBridgeManager mManager;
     private final String mCallbackId;
     private boolean mCallbacked = false;
 
-    public MessageCallbackHandler(@NonNull JsBridgeManager manager, @NonNull String callbackMsgId) {
+    public MessageCallbackHandler(@NonNull WebViewBridgeManager manager, @NonNull String callbackMsgId) {
         mManager = manager;
         mCallbackId = callbackMsgId;
     }
@@ -22,7 +22,7 @@ public class MessageCallbackHandler {
 
     public void doCallback(@NonNull JSONObject responseBody) {
         if (mCallbacked) {
-            Log.w(JsBridgeManager.TAG, "The callback has executed.");
+            Log.w(WebViewBridgeManager.TAG, "The callback has executed.");
             return;
         }
         Message message = new Message();

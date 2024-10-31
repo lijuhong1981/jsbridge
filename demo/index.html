@@ -28,8 +28,10 @@
     <script src="js/dat.gui.min.js"></script>
     <script src="../jsbridge/jsbridge.js"></script>
     <pre id="response-content"></pre>
+    <img id="image-preview" />
     <script>
         const responseContent = document.getElementById("response-content");
+        const imagePreview = document.getElementById("image-preview");
 
         const uiParams = {
             type: 'type',
@@ -60,6 +62,29 @@
             showToast: function () {
                 jsbridge.callMethod('showToast', {
                     text: uiParams.text,
+                });
+            },
+            title: "title",
+            content: "content",
+            showPositiveButton: true,
+            positiveButtonLabel: "确定",
+            showNegativeButton: false,
+            negativeButtonLabel: "取消",
+            showNeutralButton: false,
+            neutralButtonLabel: "中立",
+            showAlertDialog: function () {
+                jsbridge.callMethod('showAlertDialog', {
+                    title: uiParams.title,
+                    content: uiParams.content,
+                    showPositiveButton: uiParams.showPositiveButton,
+                    positiveButtonLabel: uiParams.positiveButtonLabel,
+                    showNegativeButton: uiParams.showNegativeButton,
+                    negativeButtonLabel: uiParams.negativeButtonLabel,
+                    showNeutralButton: uiParams.showNeutralButton,
+                    neutralButtonLabel: uiParams.neutralButtonLabel,
+                }, function (result) {
+                    console.log('showAlertDialog result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
             getAppInfo: function () {
@@ -95,6 +120,9 @@
                 jsbridge.callMethod('takePhoto', {}, function (result) {
                     console.log('takePhoto result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
+                    if (result.success) {
+                        imagePreview.src = result.data.url;
+                    }
                 });
             }
         };
@@ -106,7 +134,7 @@
         const gui = new dat.GUI();
         gui.open();
 
-        gui.add(uiParams, 'type');
+        // gui.add(uiParams, 'type');
         gui.add(uiParams, 'method');
         gui.add(uiParams, 'key1');
         gui.add(uiParams, 'value1');
@@ -116,6 +144,13 @@
         gui.add(uiParams, 'callMethod');
         gui.add(uiParams, 'text');
         gui.add(uiParams, 'showToast');
+        gui.add(uiParams, 'showPositiveButton');
+        gui.add(uiParams, 'positiveButtonLabel');
+        gui.add(uiParams, 'showNegativeButton');
+        gui.add(uiParams, 'negativeButtonLabel');
+        gui.add(uiParams, 'showNeutralButton');
+        gui.add(uiParams, 'neutralButtonLabel');
+        gui.add(uiParams, "showAlertDialog");
         gui.add(uiParams, 'getAppInfo');
         gui.add(uiParams, 'getDeviceInfo');
         gui.add(uiParams, 'getDisplayInfo');

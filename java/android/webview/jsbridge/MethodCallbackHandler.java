@@ -1,14 +1,13 @@
 package android.webview.jsbridge;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MethodCallbackHandler extends MessageCallbackHandler{
 
-    public MethodCallbackHandler(@NonNull JsBridgeManager manager, @NonNull String callbackMsgId) {
+    public MethodCallbackHandler(@NonNull WebViewBridgeManager manager, @NonNull String callbackMsgId) {
         super(manager, callbackMsgId);
     }
 
@@ -17,7 +16,7 @@ public class MethodCallbackHandler extends MessageCallbackHandler{
         return "methodCallback";
     }
 
-    public void doSuccessCallback(JSONObject resultData) {
+    public void doSuccessCallback(@NonNull JSONObject resultData) {
         try {
             JSONObject response = new JSONObject();
             response.put("success", true);
@@ -28,12 +27,18 @@ public class MethodCallbackHandler extends MessageCallbackHandler{
         }
     }
 
+    public void doSuccessCallback() {
+        doSuccessCallback(new JSONObject());
+    }
+
     public void doErrorCallback(@NonNull Throwable error) {
         try {
             JSONObject response = new JSONObject();
             response.put("success", false);
-            response.put("errorClass", error.getClass().getSimpleName());
-            response.put("errorInfo", error.getMessage());
+            JSONObject errorInfo = new JSONObject();
+            errorInfo.put("class", error.getClass().getSimpleName());
+            errorInfo.put("description", error.getMessage());
+            response.put("error", errorInfo);
             super.doCallback(response);
         } catch (JSONException e) {
             throw new RuntimeException(e);

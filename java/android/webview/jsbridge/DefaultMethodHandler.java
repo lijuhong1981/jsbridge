@@ -1,21 +1,40 @@
 package android.webview.jsbridge;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class DefaultMethodHandler implements  MethodHandler
-{
-    protected final Activity mActivity;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-    public  DefaultMethodHandler(Activity activity) {
+public class DefaultMethodHandler implements MethodHandler {
+    public static final int REQUEST_TAKE_PHOTO = 0x1000;
+
+    protected final Activity mActivity;
+    protected File mTakePhotoFile;
+    protected MethodCallbackHandler mTakePhotoCallbackHandler;
+
+    public DefaultMethodHandler(@NonNull Activity activity) {
         mActivity = activity;
     }
 
@@ -23,20 +42,13 @@ public class DefaultMethodHandler implements  MethodHandler
     public void onMethod(String method, JSONObject params, MethodCallbackHandler callbackHandler) {
         switch (method) {
             case "methodTest":
-                try {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("result", true);
-                    callbackHandler.doCallback(jsonObject);
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
+                callbackHandler.doSuccessCallback();
                 break;
             case "showToast":
-                try {
-                    showToast(params.getString("text"));
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
+                showToast(params, callbackHandler);
+                break;
+            case "showAlertDialog":
+                showAlertDialog(params, callbackHandler);
                 break;
             case "getAppInfo":
                 getAppInfo(callbackHandler);
@@ -47,11 +59,151 @@ public class DefaultMethodHandler implements  MethodHandler
             case "getDisplayInfo":
                 getDisplayInfo(callbackHandler);
                 break;
+            case "dialPhone":
+                dialPhone(params, callbackHandler);
+                break;
+            case "callPhone":
+                callPhone(params, callbackHandler);
+                break;
+            case "takePhoto":
+                takePhoto(params, callbackHandler);
+                break;
+            default:
+                callbackHandler.doErrorCallback(new NoSuchMethodException("Not found the " + method + " method."));
+                break;
         }
     }
 
-    public void showToast(String text) {
-        Toast.makeText(mActivity, text, Toast.LENGTH_SHORT).show();
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        Log.v(WebViewBridgeManager.TAG, "onActivityResult requestCode: " + requestCode + " ; resultCode: " + resultCode + " ; data: " + data);
+        switch (requestCode) {
+            case REQUEST_TAKE_PHOTO:
+                switch (resultCode){
+                    case Activity.RESULT_OK:
+                        try {
+                            String url = "http://" + WebViewBridgeManager.FILE_LOCAL_HOST + "?file=" + mTakePhotoFile.getAbsolutePath();
+                            JSONObject resultData = new JSONObject();
+                            resultData.put("url", url);
+                            mTakePhotoCallbackHandler.doSuccessCallback(resultData);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        mTakePhotoCallbackHandler.doErrorCallback(new Exception("canceled"));
+                        break;
+                    default:
+                        mTakePhotoCallbackHandler.doErrorCallback(new Exception("unknow error"));
+                        break;
+                }
+                mTakePhotoFile = null;
+                mTakePhotoCallbackHandler = null;
+                break;
+        }
+    }
+
+    public void showToast(JSONObject params, MethodCallbackHandler callbackHandler) {
+        try {
+            Toast.makeText(mActivity, params.getString("text"), Toast.LENGTH_SHORT).show();
+            callbackHandler.doSuccessCallback();
+        } catch (JSONException e) {
+//            throw new RuntimeException(e);
+            callbackHandler.doErrorCallback(e);
+            Log.e(WebViewBridgeManager.TAG, "showToast error:", e);
+        }
+    }
+
+    private DialogInterface.OnClickListener getClickListener(String positiveButtonLabel, String negativeButtonLabel, String neutralButtonLabel, MethodCallbackHandler callbackHandler) {
+        return (dialog, which) -> {
+            dialog.dismiss();
+            try {
+                JSONObject resultData = new JSONObject();
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        resultData.put("clickButton", "positive");
+                        resultData.put("clickButtonLabel", positiveButtonLabel);
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        resultData.put("clickButton", "negative");
+                        resultData.put("clickButtonLabel", negativeButtonLabel);
+                        break;
+                    case DialogInterface.BUTTON_NEUTRAL:
+                        resultData.put("clickButton", "neutral");
+                        resultData.put("clickButtonLabel", neutralButtonLabel);
+                        break;
+                }
+                resultData.put("clickButtonIndex", which);
+                callbackHandler.doSuccessCallback(resultData);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    public void showAlertDialog(JSONObject params, MethodCallbackHandler callbackHandler) {
+        mActivity.runOnUiThread(() -> {
+            String title = null;
+            try {
+                title = params.getString("title");
+            } catch (JSONException ignored) {
+            }
+            String content = null;
+            try {
+                content = params.getString("content");
+            } catch (JSONException ignored) {
+            }
+            boolean showPositiveButton = true;
+            try {
+                showPositiveButton = params.getBoolean("showPositiveButton");
+            } catch (JSONException ignored) {
+            }
+            String positiveButtonLabel = "确定";
+            try {
+                positiveButtonLabel = params.getString("positiveButtonLabel");
+            } catch (JSONException ignored) {
+            }
+            boolean showNegativeButton = false;
+            try {
+                showNegativeButton = params.getBoolean("showNegativeButton");
+            } catch (JSONException ignored) {
+            }
+            String negativeButtonLabel = "取消";
+            try {
+                negativeButtonLabel = params.getString("negativeButtonLabel");
+            } catch (JSONException ignored) {
+            }
+            boolean showNeutralButton = false;
+            try {
+                showNeutralButton = params.getBoolean("showNeutralButton");
+            } catch (JSONException ignored) {
+            }
+            String neutralButtonLabel = "中立";
+            try {
+                neutralButtonLabel = params.getString("neutralButtonLabel");
+            } catch (JSONException ignored) {
+            }
+            boolean cancelable = true;
+            try {
+                cancelable = params.getBoolean("cancelable");
+            } catch (JSONException ignored) {
+            }
+            AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+            if (title != null) builder.setTitle(title);
+            if (content != null) builder.setMessage(content);
+            DialogInterface.OnClickListener clickListener = getClickListener(positiveButtonLabel, negativeButtonLabel, neutralButtonLabel, callbackHandler);
+            if (showPositiveButton) builder.setPositiveButton(positiveButtonLabel, clickListener);
+            if (showNegativeButton) builder.setNegativeButton(negativeButtonLabel, clickListener);
+            if (showNeutralButton) builder.setNeutralButton(neutralButtonLabel, clickListener);
+            if (cancelable) {
+                builder.setCancelable(true);
+                builder.setOnCancelListener(dialog -> {
+//                    dialog.dismiss();
+                    clickListener.onClick(dialog, DialogInterface.BUTTON_NEGATIVE);
+                });
+            }
+            builder.create().show();
+        });
     }
 
     public void getAppInfo(MethodCallbackHandler callbackHandler) {
@@ -59,14 +211,14 @@ public class DefaultMethodHandler implements  MethodHandler
             String packageName = mActivity.getPackageName();
             PackageInfo packageInfo = mActivity.getPackageManager().getPackageInfo(packageName, 0);
             JSONObject resultData = new JSONObject();
-            resultData.put("packageName",packageName);
-            resultData.put("versionName",packageInfo.versionName);
-            resultData.put("versionCode",packageInfo.versionCode);
+            resultData.put("packageName", packageName);
+            resultData.put("versionName", packageInfo.versionName);
+            resultData.put("versionCode", packageInfo.versionCode);
             callbackHandler.doSuccessCallback(resultData);
         } catch (JSONException | PackageManager.NameNotFoundException e) {
 //            throw new RuntimeException(e);
             callbackHandler.doErrorCallback(e);
-            Log.e(JsBridgeManager.TAG, "getAppInfo error:", e);
+            Log.e(WebViewBridgeManager.TAG, "getAppInfo error:", e);
         }
     }
 
@@ -108,7 +260,7 @@ public class DefaultMethodHandler implements  MethodHandler
         } catch (JSONException e) {
 //            throw new RuntimeException(e);
             callbackHandler.doErrorCallback(e);
-            Log.e(JsBridgeManager.TAG, "getDeviceInfo error:", e);
+            Log.e(WebViewBridgeManager.TAG, "getDeviceInfo error:", e);
         }
     }
 
@@ -116,17 +268,84 @@ public class DefaultMethodHandler implements  MethodHandler
         try {
             DisplayMetrics displayMetrics = mActivity.getResources().getDisplayMetrics();
             JSONObject resultData = new JSONObject();
-            resultData.put("widthPixels",displayMetrics.widthPixels);
-            resultData.put("heightPixels",displayMetrics.heightPixels);
-            resultData.put("density",displayMetrics.density);
-            resultData.put("densityDpi",displayMetrics.densityDpi);
-            resultData.put("xdpi",displayMetrics.xdpi);
-            resultData.put("ydpi",displayMetrics.ydpi);
+            resultData.put("widthPixels", displayMetrics.widthPixels);
+            resultData.put("heightPixels", displayMetrics.heightPixels);
+            resultData.put("density", displayMetrics.density);
+            resultData.put("densityDpi", displayMetrics.densityDpi);
+            resultData.put("xdpi", displayMetrics.xdpi);
+            resultData.put("ydpi", displayMetrics.ydpi);
             callbackHandler.doSuccessCallback(resultData);
         } catch (JSONException e) {
 //            throw new RuntimeException(e);
             callbackHandler.doErrorCallback(e);
-            Log.e(JsBridgeManager.TAG, "getDisplayInfo error:", e);
+            Log.e(WebViewBridgeManager.TAG, "getDisplayInfo error:", e);
         }
+    }
+
+    public void dialPhone(JSONObject params, MethodCallbackHandler callbackHandler) {
+        try {
+            final String phoneNumber = params.getString("phoneNumber");
+            mActivity.runOnUiThread(() -> {
+                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mActivity.startActivity(intent);
+                callbackHandler.doSuccessCallback();
+            });
+        } catch (JSONException e) {
+//            throw new RuntimeException(e);
+            callbackHandler.doErrorCallback(e);
+            Log.e(WebViewBridgeManager.TAG, "dialPhone error:", e);
+        }
+    }
+
+    public void callPhone(JSONObject params, MethodCallbackHandler callbackHandler) {
+        try {
+            final String phoneNumber = params.getString("phoneNumber");
+            mActivity.runOnUiThread(() -> {
+                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNumber));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mActivity.startActivity(intent);
+                callbackHandler.doSuccessCallback();
+            });
+        } catch (JSONException e) {
+//            throw new RuntimeException(e);
+            callbackHandler.doErrorCallback(e);
+            Log.e(WebViewBridgeManager.TAG, "callPhone error:", e);
+        }
+    }
+
+    protected File getImageFile() throws IOException {
+        @SuppressLint("SimpleDateFormat")
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date(System.currentTimeMillis()));
+        String imageFileName = "JPEG_" + timeStamp + ".jpg";
+//        File storageDir = mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+//        assert storageDir != null;
+//        if (!storageDir.exists()) {
+//            storageDir.mkdirs();
+//        }
+//        File imageFile = new File(mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES), imageFileName);
+//        imageFile.createNewFile();
+//        imageFile.setWritable(true);
+//        return imageFile;
+        return new File(mActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES), imageFileName);
+    }
+
+    public void takePhoto(JSONObject params, MethodCallbackHandler callbackHandler) {
+        mActivity.runOnUiThread(() -> {
+            try {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                File imageFile = getImageFile();
+                Log.d(WebViewBridgeManager.TAG, "takePhoto imageFile=" + imageFile.getAbsolutePath());
+                Uri imageUri = FileProvider.getUriForFile(mActivity, mActivity.getPackageName() + ".fileProvider", imageFile);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                mTakePhotoFile = imageFile;
+                mTakePhotoCallbackHandler = callbackHandler;
+                mActivity.startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+            } catch (IOException e) {
+//                throw new RuntimeException(e);
+                callbackHandler.doErrorCallback(e);
+                Log.e(WebViewBridgeManager.TAG, "takePhoto error:", e);
+            }
+        });
     }
 }
