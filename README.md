@@ -3,7 +3,7 @@
 
 API文档点击这里 [API documentation](API.md).
 
-## 导入
+## 通过文件导入
 
 浏览器直接导入
 
@@ -79,4 +79,10 @@ jsbridge.onMessage.addEventListener((message) => {
     console.log("onMessage:", message);
     // TODO
 });
+```
+
+## 启动demo
+
+```bash
+npm run serve
 ```
