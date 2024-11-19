@@ -110,6 +110,43 @@
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
+            getAudioInfo: function () {
+                // 获取音频设备信息
+                jsbridge.callMethod('getAudioInfo', {}, function (result) {
+                    console.log('getAudioInfo result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                });
+            },
+            speakerOn: true,
+            setSpeakerOn: function () {
+                // 开关扬声器
+                jsbridge.callMethod('setSpeakerOn', {
+                    value: uiParams.speakerOn,
+                }, function (result) {
+                    console.log('setSpeakerOn result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                });
+            },
+            microphoneOn: true,
+            setMicrophoneOn: function () {
+                // 开关扬声器
+                jsbridge.callMethod('setMicrophoneOn', {
+                    value: uiParams.microphoneOn,
+                }, function (result) {
+                    console.log('setMicrophoneOn result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                });
+            },
+            mediaVolume: 5,
+            setMediaVolume: function () {
+                // 设置多媒体音量
+                jsbridge.callMethod('setMediaVolume', {
+                    value: uiParams.mediaVolume,
+                }, function (result) {
+                    console.log('setMediaVolume result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                });
+            },
             phoneNumber: "10086",
             dialPhone: function () {
                 // 打开电话拨打界面，因为并不是直接拨打电话，故不需要APP权限支持
@@ -169,6 +206,13 @@
         gui.add(uiParams, 'getAppInfo');
         gui.add(uiParams, 'getDeviceInfo');
         gui.add(uiParams, 'getDisplayInfo');
+        gui.add(uiParams, 'getAudioInfo');
+        gui.add(uiParams, 'speakerOn');
+        gui.add(uiParams, 'setSpeakerOn');
+        gui.add(uiParams, 'microphoneOn');
+        gui.add(uiParams, 'setMicrophoneOn');
+        gui.add(uiParams, 'mediaVolume');
+        gui.add(uiParams, 'setMediaVolume');
         gui.add(uiParams, 'dialPhone');
         gui.add(uiParams, 'callPhone');
         gui.add(uiParams, 'takePhoto');
