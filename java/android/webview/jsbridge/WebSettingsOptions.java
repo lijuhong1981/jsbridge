@@ -16,7 +16,7 @@ public class WebSettingsOptions {
     public WebSettings.LayoutAlgorithm layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL;
     public boolean loadsImagesAutomatically = true;
     public boolean loadWithOverviewMode = false;
-    public boolean mediaPlaybackRequiresUserGesture = true;
+    public boolean mediaPlaybackRequiresUserGesture = false;
     public int mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW;
     public boolean needInitialFocus = false;
     public boolean offscreenPreRaster = true;

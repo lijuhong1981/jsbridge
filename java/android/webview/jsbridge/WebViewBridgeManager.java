@@ -12,6 +12,7 @@ import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
+import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -277,6 +278,12 @@ public class WebViewBridgeManager {
         public void onProgressChanged(WebView view, int newProgress) {
             Log.i(TAG, "onProgressChanged: " + newProgress);
             super.onProgressChanged(view, newProgress);
+        }
+
+        @Override
+        public void onPermissionRequest(PermissionRequest request) {
+            Log.i(TAG, "onPermissionRequest: " + request.toString());
+            request.grant(request.getResources());
         }
     }
 }

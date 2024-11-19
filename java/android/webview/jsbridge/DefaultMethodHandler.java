@@ -3,10 +3,12 @@ package android.webview.jsbridge;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -59,6 +61,18 @@ public class DefaultMethodHandler implements MethodHandler {
             case "getDisplayInfo":
                 getDisplayInfo(callbackHandler);
                 break;
+            case "getAudioInfo":
+                getAudioInfo(callbackHandler);
+                break;
+            case "setSpeakerOn":
+                setSpeakerOn(params, callbackHandler);
+                break;
+            case "setMicrophoneOn":
+                setMicrophoneOn(params, callbackHandler);
+                break;
+            case "setMediaVolume":
+                setMediaVolume(params, callbackHandler);
+                break;
             case "dialPhone":
                 dialPhone(params, callbackHandler);
                 break;
@@ -82,7 +96,7 @@ public class DefaultMethodHandler implements MethodHandler {
         Log.v(WebViewBridgeManager.TAG, "onActivityResult requestCode: " + requestCode + " ; resultCode: " + resultCode + " ; data: " + data);
         switch (requestCode) {
             case REQUEST_TAKE_PHOTO:
-                switch (resultCode){
+                switch (resultCode) {
                     case Activity.RESULT_OK:
                         try {
                             String url = "http://" + WebViewBridgeManager.FILE_LOCAL_HOST + "?file=" + mTakePhotoFile.getAbsolutePath();
@@ -282,6 +296,64 @@ public class DefaultMethodHandler implements MethodHandler {
 //            throw new RuntimeException(e);
             callbackHandler.doErrorCallback(e);
             Log.e(WebViewBridgeManager.TAG, "getDisplayInfo error:", e);
+        }
+    }
+
+    public void getAudioInfo(MethodCallbackHandler callbackHandler) {
+        try {
+            AudioManager audioManager = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
+            JSONObject resultData = new JSONObject();
+            resultData.put("microphoneOn", !audioManager.isMicrophoneMute());
+            resultData.put("speakerOn", audioManager.isSpeakerphoneOn());
+            resultData.put("mediaVolume", audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                resultData.put("minMediaVolume", audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC));
+                resultData.put("maxMediaVolume", audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+            }
+            callbackHandler.doSuccessCallback(resultData);
+        } catch (JSONException e) {
+//            throw new RuntimeException(e);
+            callbackHandler.doErrorCallback(e);
+            Log.e(WebViewBridgeManager.TAG, "getAudioInfo error:", e);
+        }
+    }
+
+    public void setSpeakerOn(JSONObject params, MethodCallbackHandler callbackHandler) {
+        try {
+            boolean value = params.getBoolean("value");
+            AudioManager audioManager = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
+            audioManager.setSpeakerphoneOn(value);
+            callbackHandler.doSuccessCallback();
+        } catch (JSONException e) {
+//            throw new RuntimeException(e);
+            callbackHandler.doErrorCallback(e);
+            Log.e(WebViewBridgeManager.TAG, "muteSpeaker error:", e);
+        }
+    }
+
+    public void setMicrophoneOn(JSONObject params, MethodCallbackHandler callbackHandler) {
+        try {
+            boolean value = params.getBoolean("value");
+            AudioManager audioManager = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
+            audioManager.setMicrophoneMute(!value);
+            callbackHandler.doSuccessCallback();
+        } catch (JSONException e) {
+//            throw new RuntimeException(e);
+            callbackHandler.doErrorCallback(e);
+            Log.e(WebViewBridgeManager.TAG, "muteMicrophone error:", e);
+        }
+    }
+
+    public void setMediaVolume(JSONObject params, MethodCallbackHandler callbackHandler) {
+        try {
+            int value = params.getInt("value");
+            AudioManager audioManager = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, value, 0);
+            callbackHandler.doSuccessCallback();
+        } catch (JSONException e) {
+//            throw new RuntimeException(e);
+            callbackHandler.doErrorCallback(e);
+            Log.e(WebViewBridgeManager.TAG, "muteMicrophone error:", e);
         }
     }
 
