@@ -118,6 +118,13 @@
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
+            getConfigurationInfo:function() {
+                // 获取布局信息
+                jsbridge.callMethod('getConfigurationInfo', {}, function (result) {
+                    console.log('getConfigurationInfo result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                });
+            },
             getAudioInfo: function () {
                 // 获取音频设备信息
                 jsbridge.callMethod('getAudioInfo', {}, function (result) {
@@ -229,6 +236,7 @@
         gui.add(uiParams, 'getAppInfo');
         gui.add(uiParams, 'getDeviceInfo');
         gui.add(uiParams, 'getDisplayInfo');
+        gui.add(uiParams, 'getConfigurationInfo');
         gui.add(uiParams, 'getAudioInfo');
         gui.add(uiParams, 'speakerOn');
         gui.add(uiParams, 'setSpeakerOn');

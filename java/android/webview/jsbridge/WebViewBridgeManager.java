@@ -132,6 +132,24 @@ public class WebViewBridgeManager {
             msg.type = "configurationChanged";
             msg.body = new JSONObject();
             msg.body.put("orientation", getOrientationString(newConfig.orientation));
+            msg.body.put("fontScale", newConfig.fontScale);
+            msg.body.put("mcc", newConfig.mcc);
+            msg.body.put("mnc", newConfig.mnc);
+            msg.body.put("screenLayout", newConfig.screenLayout);
+            msg.body.put("touchscreen", newConfig.touchscreen);
+            msg.body.put("keyboard", newConfig.keyboard);
+            msg.body.put("keyboardHidden", newConfig.keyboardHidden);
+            msg.body.put("hardKeyboardHidden", newConfig.hardKeyboardHidden);
+            msg.body.put("navigation", newConfig.navigation);
+            msg.body.put("navigationHidden", newConfig.navigationHidden);
+            msg.body.put("uiMode", newConfig.uiMode);
+            msg.body.put("screenWidthDp", newConfig.screenWidthDp);
+            msg.body.put("screenHeightDp", newConfig.screenHeightDp);
+            msg.body.put("smallestScreenWidthDp", newConfig.smallestScreenWidthDp);
+            msg.body.put("densityDpi", newConfig.densityDpi);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                msg.body.put("colorMode", newConfig.colorMode);
+            }
             postMessage(msg);
         } catch (JSONException e) {
             throw new RuntimeException(e);

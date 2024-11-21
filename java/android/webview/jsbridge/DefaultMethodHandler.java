@@ -62,6 +62,9 @@ public class DefaultMethodHandler implements MethodHandler {
             case "getDisplayInfo":
                 getDisplayInfo(callbackHandler);
                 break;
+            case "getConfigurationInfo":
+                getConfigurationInfo(callbackHandler);
+                break;
             case "getAudioInfo":
                 getAudioInfo(callbackHandler);
                 break;
@@ -292,7 +295,6 @@ public class DefaultMethodHandler implements MethodHandler {
     public void getDisplayInfo(MethodCallbackHandler callbackHandler) {
         try {
             DisplayMetrics displayMetrics = mActivity.getResources().getDisplayMetrics();
-            Configuration configuration = mActivity.getResources().getConfiguration();
             JSONObject resultData = new JSONObject();
             resultData.put("widthPixels", displayMetrics.widthPixels);
             resultData.put("heightPixels", displayMetrics.heightPixels);
@@ -300,12 +302,42 @@ public class DefaultMethodHandler implements MethodHandler {
             resultData.put("densityDpi", displayMetrics.densityDpi);
             resultData.put("xdpi", displayMetrics.xdpi);
             resultData.put("ydpi", displayMetrics.ydpi);
-            resultData.put("orientation", WebViewBridgeManager.getOrientationString(configuration.orientation));
             callbackHandler.doSuccessCallback(resultData);
         } catch (JSONException e) {
 //            throw new RuntimeException(e);
             callbackHandler.doErrorCallback(e);
             Log.e(WebViewBridgeManager.TAG, "getDisplayInfo error:", e);
+        }
+    }
+
+    public void getConfigurationInfo(MethodCallbackHandler callbackHandler) {
+        try {
+            Configuration configuration = mActivity.getResources().getConfiguration();
+            JSONObject resultData = new JSONObject();
+            resultData.put("orientation", WebViewBridgeManager.getOrientationString(configuration.orientation));
+            resultData.put("fontScale", configuration.fontScale);
+            resultData.put("mcc", configuration.mcc);
+            resultData.put("mnc", configuration.mnc);
+            resultData.put("screenLayout", configuration.screenLayout);
+            resultData.put("touchscreen", configuration.touchscreen);
+            resultData.put("keyboard", configuration.keyboard);
+            resultData.put("keyboardHidden", configuration.keyboardHidden);
+            resultData.put("hardKeyboardHidden", configuration.hardKeyboardHidden);
+            resultData.put("navigation", configuration.navigation);
+            resultData.put("navigationHidden", configuration.navigationHidden);
+            resultData.put("uiMode", configuration.uiMode);
+            resultData.put("screenWidthDp", configuration.screenWidthDp);
+            resultData.put("screenHeightDp", configuration.screenHeightDp);
+            resultData.put("smallestScreenWidthDp", configuration.smallestScreenWidthDp);
+            resultData.put("densityDpi", configuration.densityDpi);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                resultData.put("colorMode", configuration.colorMode);
+            }
+            callbackHandler.doSuccessCallback(resultData);
+        } catch (JSONException e) {
+//            throw new RuntimeException(e);
+            callbackHandler.doErrorCallback(e);
+            Log.e(WebViewBridgeManager.TAG, "getConfigurationInfo error:", e);
         }
     }
 
