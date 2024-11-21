@@ -18,7 +18,13 @@
 
         #response-content {
             width: 100%;
-            height: 100%;
+            height: 50%;
+            padding: 5em;
+        }
+
+        #receive-message {
+            width: 100%;
+            height: 50%;
             padding: 5em;
         }
     </style>
@@ -28,9 +34,11 @@
     <script src="js/dat.gui.min.js"></script>
     <script src="../jsbridge/jsbridge.js"></script>
     <pre id="response-content"></pre>
+    <pre id="receive-message"></pre>
     <img id="image-preview" />
     <script>
         const responseContent = document.getElementById("response-content");
+        const receiveMessage = document.getElementById("receive-message");
         const imagePreview = document.getElementById("image-preview");
 
         const uiParams = {
@@ -147,6 +155,16 @@
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
+            voiceVolume: 5,
+            setVoiceVolume: function () {
+                // 设置通话音量
+                jsbridge.callMethod('setVoiceVolume', {
+                    value: uiParams.voiceVolume,
+                }, function (result) {
+                    console.log('setVoiceVolume result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                });
+            },
             phoneNumber: "10086",
             dialPhone: function () {
                 // 打开电话拨打界面，因为并不是直接拨打电话，故不需要APP权限支持
@@ -181,6 +199,11 @@
 
         jsbridge.onMessage.addEventListener(function (message) {
             console.log("onMessage:", message);
+            receiveMessage.innerText = JSON.stringify(message, null, 2);
+            switch (message.type) {
+                case 'configurationChanged': //横竖屏切换事件
+                    break;
+            }
         });
 
         const gui = new dat.GUI();
@@ -213,6 +236,8 @@
         gui.add(uiParams, 'setMicrophoneOn');
         gui.add(uiParams, 'mediaVolume');
         gui.add(uiParams, 'setMediaVolume');
+        gui.add(uiParams, 'voiceVolume');
+        gui.add(uiParams, 'setVoiceVolume');
         gui.add(uiParams, 'dialPhone');
         gui.add(uiParams, 'callPhone');
         gui.add(uiParams, 'takePhoto');

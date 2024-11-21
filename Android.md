@@ -31,6 +31,16 @@ protected void onActivityResult(int requestCode, int resultCode, @Nullable Inten
 }
 ```
 
+在Activity的onConfigurationChanged方法下添加如下代码
+
+```java
+@Override
+public void onConfigurationChanged(@NonNull Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    mManager.onConfigurationChanged(newConfig);
+}
+```
+
 ## 向Web端发送消息
 
 ```java

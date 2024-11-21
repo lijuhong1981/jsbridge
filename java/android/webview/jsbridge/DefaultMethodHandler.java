@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -72,6 +73,9 @@ public class DefaultMethodHandler implements MethodHandler {
                 break;
             case "setMediaVolume":
                 setMediaVolume(params, callbackHandler);
+                break;
+            case "setVoiceVolume":
+                setVoiceVolume(params, callbackHandler);
                 break;
             case "dialPhone":
                 dialPhone(params, callbackHandler);
@@ -261,18 +265,7 @@ public class DefaultMethodHandler implements MethodHandler {
                 resultData.put("SOC_MODEL", Build.SOC_MODEL);
             }
             resultData.put("USER", Build.USER);
-            JSONObject versionData = new JSONObject();
-            versionData.put("BASE_OS", Build.VERSION.BASE_OS);
-            versionData.put("CODENAME", Build.VERSION.CODENAME);
-            versionData.put("INCREMENTAL", Build.VERSION.INCREMENTAL);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                versionData.put("MEDIA_PERFORMANCE_CLASS", Build.VERSION.MEDIA_PERFORMANCE_CLASS);
-            }
-            versionData.put("PREVIEW_SDK_INT", Build.VERSION.PREVIEW_SDK_INT);
-            versionData.put("RELEASE", Build.VERSION.RELEASE);
-            versionData.put("SDK_INT", Build.VERSION.SDK_INT);
-            versionData.put("SECURITY_PATCH", Build.VERSION.SECURITY_PATCH);
-            resultData.put("VERSION", versionData);
+            resultData.put("VERSION", getVersionData());
             callbackHandler.doSuccessCallback(resultData);
         } catch (JSONException e) {
 //            throw new RuntimeException(e);
@@ -281,9 +274,25 @@ public class DefaultMethodHandler implements MethodHandler {
         }
     }
 
+    private @NonNull JSONObject getVersionData() throws JSONException {
+        JSONObject versionData = new JSONObject();
+        versionData.put("BASE_OS", Build.VERSION.BASE_OS);
+        versionData.put("CODENAME", Build.VERSION.CODENAME);
+        versionData.put("INCREMENTAL", Build.VERSION.INCREMENTAL);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            versionData.put("MEDIA_PERFORMANCE_CLASS", Build.VERSION.MEDIA_PERFORMANCE_CLASS);
+        }
+        versionData.put("PREVIEW_SDK_INT", Build.VERSION.PREVIEW_SDK_INT);
+        versionData.put("RELEASE", Build.VERSION.RELEASE);
+        versionData.put("SDK_INT", Build.VERSION.SDK_INT);
+        versionData.put("SECURITY_PATCH", Build.VERSION.SECURITY_PATCH);
+        return versionData;
+    }
+
     public void getDisplayInfo(MethodCallbackHandler callbackHandler) {
         try {
             DisplayMetrics displayMetrics = mActivity.getResources().getDisplayMetrics();
+            Configuration configuration = mActivity.getResources().getConfiguration();
             JSONObject resultData = new JSONObject();
             resultData.put("widthPixels", displayMetrics.widthPixels);
             resultData.put("heightPixels", displayMetrics.heightPixels);
@@ -291,6 +300,7 @@ public class DefaultMethodHandler implements MethodHandler {
             resultData.put("densityDpi", displayMetrics.densityDpi);
             resultData.put("xdpi", displayMetrics.xdpi);
             resultData.put("ydpi", displayMetrics.ydpi);
+            resultData.put("orientation", WebViewBridgeManager.getOrientationString(configuration.orientation));
             callbackHandler.doSuccessCallback(resultData);
         } catch (JSONException e) {
 //            throw new RuntimeException(e);
@@ -309,6 +319,11 @@ public class DefaultMethodHandler implements MethodHandler {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 resultData.put("minMediaVolume", audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC));
                 resultData.put("maxMediaVolume", audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+            }
+            resultData.put("voiceVolume", audioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                resultData.put("minVoiceVolume", audioManager.getStreamMinVolume(AudioManager.STREAM_VOICE_CALL));
+                resultData.put("maxVoiceVolume", audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL));
             }
             callbackHandler.doSuccessCallback(resultData);
         } catch (JSONException e) {
@@ -349,6 +364,19 @@ public class DefaultMethodHandler implements MethodHandler {
             int value = params.getInt("value");
             AudioManager audioManager = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
             audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, value, 0);
+            callbackHandler.doSuccessCallback();
+        } catch (JSONException e) {
+//            throw new RuntimeException(e);
+            callbackHandler.doErrorCallback(e);
+            Log.e(WebViewBridgeManager.TAG, "muteMicrophone error:", e);
+        }
+    }
+
+    public void setVoiceVolume(JSONObject params, MethodCallbackHandler callbackHandler) {
+        try {
+            int value = params.getInt("value");
+            AudioManager audioManager = (AudioManager) mActivity.getSystemService(Context.AUDIO_SERVICE);
+            audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, value, 0);
             callbackHandler.doSuccessCallback();
         } catch (JSONException e) {
 //            throw new RuntimeException(e);

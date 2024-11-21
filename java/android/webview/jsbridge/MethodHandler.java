@@ -1,7 +1,9 @@
 package android.webview.jsbridge;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.json.JSONObject;

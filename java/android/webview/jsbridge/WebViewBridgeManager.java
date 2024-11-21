@@ -3,6 +3,7 @@ package android.webview.jsbridge;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
@@ -43,6 +44,17 @@ public class WebViewBridgeManager {
     public final WebSettings webSettings;
     private final ArrayList<MessageReceiver> mMessageReceivers = new ArrayList<>();
     private MethodHandler mMethodHandler;
+
+    public static String getOrientationString(int orientation) {
+        switch (orientation) {
+            case Configuration.ORIENTATION_PORTRAIT:
+                return "PORTRAIT".toLowerCase();
+            case Configuration.ORIENTATION_LANDSCAPE:
+                return "LANDSCAPE".toLowerCase();
+            default:
+                return "unknown";
+        }
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     public WebViewBridgeManager(@NonNull Activity activity, @NonNull WebView webView, @Nullable WebSettingsOptions options) {
@@ -112,6 +124,18 @@ public class WebViewBridgeManager {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (mMethodHandler != null)
             mMethodHandler.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        try {
+            Message msg = new Message();
+            msg.type = "configurationChanged";
+            msg.body = new JSONObject();
+            msg.body.put("orientation", getOrientationString(newConfig.orientation));
+            postMessage(msg);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void registerMessageReceiver(@NonNull MessageReceiver handler) {
