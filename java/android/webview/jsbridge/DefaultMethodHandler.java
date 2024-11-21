@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -67,6 +68,9 @@ public class DefaultMethodHandler implements MethodHandler {
                 break;
             case "getAudioInfo":
                 getAudioInfo(callbackHandler);
+                break;
+            case "setOrientation":
+                setOrientation(params, callbackHandler);
                 break;
             case "setSpeakerOn":
                 setSpeakerOn(params, callbackHandler);
@@ -363,6 +367,30 @@ public class DefaultMethodHandler implements MethodHandler {
             callbackHandler.doErrorCallback(e);
             Log.e(WebViewBridgeManager.TAG, "getAudioInfo error:", e);
         }
+    }
+
+    public void setOrientation(JSONObject params, MethodCallbackHandler callbackHandler) {
+        mActivity.runOnUiThread(() -> {
+            try {
+                String value = params.getString("value");
+                switch (value.toLowerCase()) {
+                    case "portrait":
+                        mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                        break;
+                    case "landscape":
+                        mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                        break;
+                    default:
+                        Log.w(WebViewBridgeManager.TAG, "setOrientation unknown orientation value " + value);
+                        break;
+                }
+                callbackHandler.doSuccessCallback();
+            } catch (JSONException e) {
+//            throw new RuntimeException(e);
+                callbackHandler.doErrorCallback(e);
+                Log.e(WebViewBridgeManager.TAG, "setOrientation error:", e);
+            }
+        });
     }
 
     public void setSpeakerOn(JSONObject params, MethodCallbackHandler callbackHandler) {

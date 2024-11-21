@@ -41,6 +41,11 @@
         const receiveMessage = document.getElementById("receive-message");
         const imagePreview = document.getElementById("image-preview");
 
+        const orientations = [
+            'portrait', //竖屏
+            'landscape' //横屏
+        ];
+
         const uiParams = {
             type: 'type',
             method: 'methodTest',
@@ -118,7 +123,7 @@
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
-            getConfigurationInfo:function() {
+            getConfigurationInfo: function () {
                 // 获取布局信息
                 jsbridge.callMethod('getConfigurationInfo', {}, function (result) {
                     console.log('getConfigurationInfo result:', result);
@@ -129,6 +134,16 @@
                 // 获取音频设备信息
                 jsbridge.callMethod('getAudioInfo', {}, function (result) {
                     console.log('getAudioInfo result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                });
+            },
+            orientation: orientations[0],
+            setOrientation: function () {
+                // 设置横竖屏
+                jsbridge.callMethod('setOrientation', {
+                    value: uiParams.orientation,
+                }, function (result) {
+                    console.log('setOrientation result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
@@ -238,6 +253,8 @@
         gui.add(uiParams, 'getDisplayInfo');
         gui.add(uiParams, 'getConfigurationInfo');
         gui.add(uiParams, 'getAudioInfo');
+        gui.add(uiParams, 'orientation', orientations);
+        gui.add(uiParams, 'setOrientation');
         gui.add(uiParams, 'speakerOn');
         gui.add(uiParams, 'setSpeakerOn');
         gui.add(uiParams, 'microphoneOn');

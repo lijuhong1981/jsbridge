@@ -48,9 +48,9 @@ public class WebViewBridgeManager {
     public static String getOrientationString(int orientation) {
         switch (orientation) {
             case Configuration.ORIENTATION_PORTRAIT:
-                return "PORTRAIT".toLowerCase();
+                return "portrait";
             case Configuration.ORIENTATION_LANDSCAPE:
-                return "LANDSCAPE".toLowerCase();
+                return "landscape";
             default:
                 return "unknown";
         }
