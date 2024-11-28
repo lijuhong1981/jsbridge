@@ -32,19 +32,32 @@
 
 <body>
     <script src="js/dat.gui.min.js"></script>
+    <script src="js/vconsole.min.js"></script>
     <script src="../jsbridge/jsbridge.js"></script>
     <pre id="response-content"></pre>
     <pre id="receive-message"></pre>
-    <img id="image-preview" />
+    <img id="image-preview" width="480px" height="480px" />
+    <video id="video-preview" width="480px" height="480px" controls="auto"></video>
+    <audio id="audio-preview" controls="auto"></audio>
     <script>
+        const vConsole = new window.VConsole();
         const responseContent = document.getElementById("response-content");
         const receiveMessage = document.getElementById("receive-message");
         const imagePreview = document.getElementById("image-preview");
+        const videoPreview = document.getElementById("video-preview");
+        const audioPreview = document.getElementById("audio-preview");
 
         const orientations = [
             'portrait', //竖屏
             'landscape' //横屏
         ];
+        const contentTypes = [
+            'image', //图片
+            'video', //视频
+            'audio', //音频
+            'contacts', //联系人
+        ];
+        let pickContentResult;
 
         const uiParams = {
             type: 'type',
@@ -200,14 +213,56 @@
                     phoneNumber: uiParams.phoneNumber, //电话号码
                 });
             },
-            takePhoto: function () {
+            captureImage: function () {
                 // 调用相机拍照，需要APP权限支持，成功后会返回一个图片url，image.src可直接使用
-                jsbridge.callMethod('takePhoto', {}, function (result) {
-                    console.log('takePhoto result:', result);
+                jsbridge.callMethod('captureImage', {}, function (result) {
+                    console.log('captureImage result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
                     if (result.success) {
                         imagePreview.src = result.data.url;
+                        uiParams.filePath = result.data.filePath;
                     }
+                });
+            },
+            contentType: contentTypes[0],
+            pickContent: function () {
+                // 获取本地内容，需要APP权限支持，成功后会返回一个url，image.src可直接使用
+                jsbridge.callMethod('pickContent', {
+                    type: uiParams.contentType,
+                }, function (result) {
+                    console.log('pickContent result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                    if (result.success) {
+                        if (result.data.type === 'image') imagePreview.src = result.data.url;
+                        else if (result.data.type === 'video') videoPreview.src = result.data.url;
+                        else if (result.data.type === 'audio') audioPreview.src = result.data.url;
+                        uiParams.filePath = result.data.filePath;
+                    }
+                });
+            },
+            uploadUrl: 'http://api.pcitech.online/attachment-service/upload',
+            filePath: '',
+            uploadFile: function () {
+                jsbridge.callMethod('uploadFile', {
+                    uploadUrl: uiParams.uploadUrl, //上传地址，必填
+                    filePath: uiParams.filePath, //文件路径，必填
+                    // headers: { //请求头参数，键值对，选填
+                    //     'key1': 'value1',
+                    //     'key2': 'value2',
+                    // },
+                    // 以下是PCIRCS使用的变量
+                    // token: '1234567890', //登录token，选填
+                    // bizType: 'rcs-im', //业务类型，选填
+                }, function (result) {
+                    console.log('uploadFile result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                    if (result.success)
+                        if (result.data.status === 'partial') { //上传部分
+                            // 计算上传进度
+                            const process = result.data.bytesWritten / result.data.totalBytes;
+                            console.log('uploadFile process: ' + process);
+                        } else if (result.data.status === 'complete') { //上传完成
+                        }
                 });
             },
             force: false,
@@ -216,7 +271,7 @@
                 jsbridge.callMethod('exitApp', {
                     force: uiParams.force, //是否强制退出，不推荐使用true
                 });
-            }
+            },
         };
 
         jsbridge.onMessage.addEventListener(function (message) {
@@ -265,7 +320,12 @@
         gui.add(uiParams, 'setVoiceVolume');
         gui.add(uiParams, 'dialPhone');
         gui.add(uiParams, 'callPhone');
-        gui.add(uiParams, 'takePhoto');
+        gui.add(uiParams, 'captureImage');
+        gui.add(uiParams, 'contentType', contentTypes);
+        gui.add(uiParams, 'pickContent');
+        gui.add(uiParams, 'uploadUrl');
+        gui.add(uiParams, 'filePath').listen();
+        gui.add(uiParams, 'uploadFile');
         gui.add(uiParams, 'force');
         gui.add(uiParams, 'exitApp');
     </script>

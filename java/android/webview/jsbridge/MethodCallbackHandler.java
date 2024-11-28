@@ -16,22 +16,26 @@ public class MethodCallbackHandler extends MessageCallbackHandler{
         return "methodCallback";
     }
 
-    public void doSuccessCallback(@NonNull JSONObject resultData) {
+    public void notifySuccessCallback(@NonNull JSONObject resultData, boolean persistCallback) {
         try {
             JSONObject response = new JSONObject();
             response.put("success", true);
             response.put("data", resultData);
-            super.doCallback(response);
+            super.notifyCallback(response, persistCallback);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void doSuccessCallback() {
-        doSuccessCallback(new JSONObject());
+    public void notifySuccessCallback(@NonNull JSONObject resultData) {
+        notifySuccessCallback(resultData, false);
     }
 
-    public void doErrorCallback(@NonNull Throwable error) {
+    public void notifySuccessCallback() {
+        notifySuccessCallback(new JSONObject());
+    }
+
+    public void notifyErrorCallback(@NonNull Throwable error, boolean persistCallback) {
         try {
             JSONObject response = new JSONObject();
             response.put("success", false);
@@ -39,9 +43,13 @@ public class MethodCallbackHandler extends MessageCallbackHandler{
             errorInfo.put("class", error.getClass().getSimpleName());
             errorInfo.put("description", error.getMessage());
             response.put("error", errorInfo);
-            super.doCallback(response);
+            super.notifyCallback(response, persistCallback);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void notifyErrorCallback(@NonNull Throwable error) {
+        notifyErrorCallback(error, false);
     }
 }

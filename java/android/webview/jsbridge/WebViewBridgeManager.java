@@ -39,26 +39,16 @@ public class WebViewBridgeManager {
     public static final String TAG = WebViewBridgeManager.class.getSimpleName();
     public static final String FILE_LOCAL_HOST = "file.local";
 
-    private final Activity mActivity;
+    public final Activity activity;
     public final WebView webView;
     public final WebSettings webSettings;
     private final ArrayList<MessageReceiver> mMessageReceivers = new ArrayList<>();
     private MethodHandler mMethodHandler;
-
-    public static String getOrientationString(int orientation) {
-        switch (orientation) {
-            case Configuration.ORIENTATION_PORTRAIT:
-                return "portrait";
-            case Configuration.ORIENTATION_LANDSCAPE:
-                return "landscape";
-            default:
-                return "unknown";
-        }
-    }
+    private UploadFileHandler mUploadFileHandler;
 
     @SuppressLint("SetJavaScriptEnabled")
     public WebViewBridgeManager(@NonNull Activity activity, @NonNull WebView webView, @Nullable WebSettingsOptions options) {
-        mActivity = activity;
+        this.activity = activity;
         this.webView = webView;
         if (options == null)
             options = new WebSettingsOptions();
@@ -118,7 +108,26 @@ public class WebViewBridgeManager {
         this.webView.addJavascriptInterface(new AndroidInterface(), "jsbridgeInterface");
         this.webView.setWebViewClient(new MyWebViewClient());
         this.webView.setWebChromeClient(new MyWebChromeClient());
-        mMethodHandler = new DefaultMethodHandler(activity);
+        mMethodHandler = new DefaultMethodHandler(this);
+        mUploadFileHandler = new DefaultUploadFileHandler();
+    }
+
+    public void setMethodHandler(@Nullable MethodHandler handler) {
+        if (mMethodHandler != handler)
+            mMethodHandler = handler;
+    }
+
+    public MethodHandler getMethodHandler() {
+        return mMethodHandler;
+    }
+
+    public void setUploadFileHandler(@NonNull UploadFileHandler handler) {
+        if (mUploadFileHandler != handler)
+            mUploadFileHandler = handler;
+    }
+
+    public UploadFileHandler getUploadFileHandler() {
+        return mUploadFileHandler;
     }
 
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -131,7 +140,7 @@ public class WebViewBridgeManager {
             Message msg = new Message();
             msg.type = "configurationChanged";
             msg.body = new JSONObject();
-            msg.body.put("orientation", getOrientationString(newConfig.orientation));
+            msg.body.put("orientation", Tools.getOrientationString(newConfig.orientation));
             msg.body.put("fontScale", newConfig.fontScale);
             msg.body.put("mcc", newConfig.mcc);
             msg.body.put("mnc", newConfig.mnc);
@@ -172,15 +181,6 @@ public class WebViewBridgeManager {
         }
     }
 
-    public void setMethodHandler(@Nullable MethodHandler handler) {
-        if (mMethodHandler != handler)
-            mMethodHandler = handler;
-    }
-
-    public MethodHandler getMethodHandler() {
-        return mMethodHandler;
-    }
-
     private void notifyMethodHandler(@NonNull Message message) {
         try {
             String method = message.body.getString("method");
@@ -194,7 +194,7 @@ public class WebViewBridgeManager {
     }
 
     public void postMessage(@NonNull JSONObject jsonObject) {
-        mActivity.runOnUiThread(() -> {
+        activity.runOnUiThread(() -> {
             String jsonString = jsonObject.toString();
             Log.d(TAG, "postMessageToWeb: " + jsonString);
             String script = String.format("onBridgeMessage('%s');", jsonString);
@@ -212,6 +212,8 @@ public class WebViewBridgeManager {
             jsonObject.put("id", message.id);
             jsonObject.put("type", message.type);
             jsonObject.put("body", message.body);
+            if (message.persistCallback)
+                jsonObject.put("persistCallback", true);
             postMessage(jsonObject);
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -275,9 +277,9 @@ public class WebViewBridgeManager {
                     return super.shouldInterceptRequest(view, request);
                 }
                 try {
-                    Log.d(TAG, "shouldInterceptRequest: " + filePath);
                     String extName = filePath.substring(filePath.lastIndexOf(".") + 1);
                     String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extName);
+                    Log.v(TAG, "shouldInterceptRequest: filePath=" + filePath + "; mimeType=" + mimeType);
                     FileInputStream input = new FileInputStream(filePath.trim());
                     return new WebResourceResponse(mimeType, "UTF-8", input);
                 } catch (FileNotFoundException e) {
@@ -295,7 +297,7 @@ public class WebViewBridgeManager {
 
         @Override
         public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-            Log.e(TAG, "onReceivedHttpError: url=" +  request.getUrl() + "; statusCode=" + errorResponse.getStatusCode() + "; reason=" + errorResponse.getReasonPhrase());
+            Log.e(TAG, "onReceivedHttpError: url=" + request.getUrl() + "; statusCode=" + errorResponse.getStatusCode() + "; reason=" + errorResponse.getReasonPhrase());
             super.onReceivedHttpError(view, request, errorResponse);
         }
 

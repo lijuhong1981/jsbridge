@@ -3,13 +3,15 @@ package android.webview.jsbridge;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.json.JSONObject;
+
+import java.util.Optional;
 
 public class MessageCallbackHandler {
     private final WebViewBridgeManager mManager;
     private final String mCallbackId;
-    private boolean mCallbacked = false;
 
     public MessageCallbackHandler(@NonNull WebViewBridgeManager manager, @NonNull String callbackMsgId) {
         mManager = manager;
@@ -20,16 +22,16 @@ public class MessageCallbackHandler {
         return "messageCallback";
     }
 
-    public void doCallback(@NonNull JSONObject responseBody) {
-        if (mCallbacked) {
-            Log.w(WebViewBridgeManager.TAG, "The callback has executed.");
-            return;
-        }
+    public void notifyCallback(@NonNull JSONObject responseBody, boolean persistCallback) {
         Message message = new Message();
         message.id = mCallbackId;
         message.type = getCallbackMsgType();
         message.body = responseBody;
+        message.persistCallback = persistCallback;
         mManager.postMessage(message);
-        mCallbacked = true;
+    }
+
+    public void notifyCallback(@NonNull JSONObject responseBody) {
+        notifyCallback(responseBody, false);
     }
 }

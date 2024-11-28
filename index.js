@@ -96,7 +96,8 @@ function onReceiveMessage(json) {
         const callback = messageCallbacks[message.id];
         if (typeof callback === 'function' && message.body)
             callback(message.body);
-        delete messageCallbacks[message.id];
+        if (!message.persistCallback)
+            delete messageCallbacks[message.id];
     } else {
         onMessage.raiseEvent(message);
     }

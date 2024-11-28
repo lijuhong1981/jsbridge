@@ -64,7 +64,7 @@ mManager.registerMessageReceiver(new MessageReceiver() {
         //如果需要回应消息，可使用下面代码
         JSONObject response = new JSONObject();
         ...
-        callbackHandler.doCallback(response);
+        callbackHandler.notifyCallback(response);
     }
 });
 ```
@@ -77,17 +77,17 @@ mManager.setMethodHandler(new MethodHandler() {
     public void onMethod(String method, JSONObject params, MethodCallbackHandler callbackHandler) {
         switch (method) {
             case "methodTest":
-                callbackHandler.doSuccessCallback();
+                callbackHandler.notifySuccessCallback();
                 break;
             ...
             default:
-                callbackHandler.doErrorCallback(new NoSuchMethodException("Not found the " + method + " method."));
+                callbackHandler.notifyErrorCallback(new NoSuchMethodException("Not found the " + method + " method."));
                 break;
         }
         //如果方法需要回复，可使用下面代码
         JSONObject result = new JSONObject();
         ...
-        callbackHandler.doSuccessCallback(result);
+        callbackHandler.notifySuccessCallback(result);
     }
 
     @Override
@@ -112,6 +112,22 @@ mManager.setMethodHandler(new DefaultMethodHandler(WebViewActivity.this){
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //TODO
+    }
+});
+```
+
+## 文件上传
+
+代码中已内置了一个DefaultUploadFileHandler类，实现了基础的文件上传，WebViewBridgeManager初始化时会默认使用该类，也可通过WebViewBridgeManager的setUploadFileHandler接口来实现自己的文件上传
+
+```java
+mManager.setUploadFileHandler(new UploadFileHandler() {
+    @Override
+    public void uploadFile(JSONObject params, MethodCallbackHandler callbackHandler) {
+        String uploadUrl = params.getString("uploadUrl"); //上传地址
+        String filePath = params.getString("filePath"); //文件路径
+        JSONObject headers = params.getJSONObject("headers"); //请求头
+        // TODO
     }
 });
 ```
