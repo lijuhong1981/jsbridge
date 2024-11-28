@@ -224,6 +224,17 @@
                     }
                 });
             },
+            captureVideo: function () {
+                // 调用相机录像，需要APP权限支持，成功后会返回一个视频url，video.src可直接使用
+                jsbridge.callMethod('captureVideo', {}, function (result) {
+                    console.log('captureVideo result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                    if (result.success) {
+                        imagePreview.src = result.data.url;
+                        uiParams.filePath = result.data.filePath;
+                    }
+                });
+            },
             contentType: contentTypes[0],
             pickContent: function () {
                 // 获取本地内容，需要APP权限支持，成功后会返回一个url，image.src可直接使用
@@ -321,6 +332,7 @@
         gui.add(uiParams, 'dialPhone');
         gui.add(uiParams, 'callPhone');
         gui.add(uiParams, 'captureImage');
+        gui.add(uiParams, 'captureVideo');
         gui.add(uiParams, 'contentType', contentTypes);
         gui.add(uiParams, 'pickContent');
         gui.add(uiParams, 'uploadUrl');
