@@ -37,10 +37,11 @@ import java.util.concurrent.CancellationException;
 
 public class DefaultMethodHandler implements MethodHandler {
     public static final int REQUEST_CAPTURE_IMAGE = 0x1000;
-    public static final int REQUEST_PICK_IMAGE = 0x1001;
-    public static final int REQUEST_PICK_VIDEO = 0x1002;
-    public static final int REQUEST_PICK_AUDIO = 0x1003;
-    public static final int REQUEST_PICK_CONTACTS = 0x1004;
+    public static final int REQUEST_CAPTURE_VIDEO = 0x1001;
+    public static final int REQUEST_PICK_IMAGE = 0x2001;
+    public static final int REQUEST_PICK_VIDEO = 0x2002;
+    public static final int REQUEST_PICK_AUDIO = 0x2003;
+    public static final int REQUEST_PICK_CONTACTS = 0x2004;
 
     private static String getTypeFromRequestCode(int requestCode) throws NoSuchFieldException {
         switch (requestCode) {
@@ -60,6 +61,7 @@ public class DefaultMethodHandler implements MethodHandler {
     public final WebViewBridgeManager manager;
     protected File mCaptureImageFile;
     protected MethodCallbackHandler mCaptureImageCallbackHandler;
+    protected MethodCallbackHandler mCaptureVideoCallbackHandler;
     protected MethodCallbackHandler mPickContentCallbackHandler;
 
     public DefaultMethodHandler(@NonNull WebViewBridgeManager manager) {
@@ -117,6 +119,9 @@ public class DefaultMethodHandler implements MethodHandler {
             case "captureImage":
                 captureImage(params, callbackHandler);
                 break;
+            case "captureVideo":
+                captureVideo(params, callbackHandler);
+                break;
             case "pickContent":
                 pickContent(params, callbackHandler);
                 break;
@@ -159,6 +164,33 @@ public class DefaultMethodHandler implements MethodHandler {
                 }
                 mCaptureImageFile = null;
                 mCaptureImageCallbackHandler = null;
+                break;
+            case REQUEST_CAPTURE_VIDEO:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        try {
+                            if (data == null || data.getData() == null)
+                                throw new NullPointerException("The pickContent result data is null.");
+                            Uri contentUri = data.getData();
+                            String filePath = Tools.getFilePathFromMediaStoreUri(manager.activity, contentUri);
+                            String url = "http://" + WebViewBridgeManager.FILE_LOCAL_HOST + "?file=" + filePath;
+                            JSONObject resultData = new JSONObject();
+                            resultData.put("filePath", filePath);
+                            resultData.put("url", url);
+                            mCaptureVideoCallbackHandler.notifySuccessCallback(resultData);
+                        } catch (Exception e) {
+//                            throw new RuntimeException(e);
+                            mCaptureVideoCallbackHandler.notifyErrorCallback(e);
+                        }
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        mCaptureVideoCallbackHandler.notifyErrorCallback(new CancellationException("The captureVideo canceled."));
+                        break;
+                    default:
+                        mCaptureVideoCallbackHandler.notifyErrorCallback(new UnknownError("Unknown resultCode " + resultCode));
+                        break;
+                }
+                mCaptureVideoCallbackHandler = null;
                 break;
             case REQUEST_PICK_IMAGE:
             case REQUEST_PICK_VIDEO:
@@ -592,6 +624,14 @@ public class DefaultMethodHandler implements MethodHandler {
                 callbackHandler.notifyErrorCallback(e);
                 Log.e(WebViewBridgeManager.TAG, "captureImage error:", e);
             }
+        });
+    }
+
+    public void captureVideo(JSONObject params, MethodCallbackHandler callbackHandler) {
+        manager.activity.runOnUiThread(() -> {
+            Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+            mCaptureVideoCallbackHandler = callbackHandler;
+            manager.activity.startActivityForResult(intent, REQUEST_CAPTURE_VIDEO);
         });
     }
 
