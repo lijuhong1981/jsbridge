@@ -30,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,6 +39,7 @@ import java.util.concurrent.CancellationException;
 public class DefaultMethodHandler implements MethodHandler {
     public static final int REQUEST_CAPTURE_IMAGE = 0x1000;
     public static final int REQUEST_CAPTURE_VIDEO = 0x1001;
+    public static final int REQUEST_PICK_FILE = 0x2000;
     public static final int REQUEST_PICK_IMAGE = 0x2001;
     public static final int REQUEST_PICK_VIDEO = 0x2002;
     public static final int REQUEST_PICK_AUDIO = 0x2003;
@@ -45,6 +47,8 @@ public class DefaultMethodHandler implements MethodHandler {
 
     private static String getTypeFromRequestCode(int requestCode) throws NoSuchFieldException {
         switch (requestCode) {
+            case REQUEST_PICK_FILE:
+                return  "file";
             case REQUEST_PICK_IMAGE:
                 return "image";
             case REQUEST_PICK_VIDEO:
@@ -172,7 +176,7 @@ public class DefaultMethodHandler implements MethodHandler {
                             if (data == null || data.getData() == null)
                                 throw new NullPointerException("The pickContent result data is null.");
                             Uri contentUri = data.getData();
-                            String filePath = Tools.getFilePathFromMediaStoreUri(manager.activity, contentUri);
+                            String filePath = Tools.getFilePathFromUri(manager.activity, contentUri);
                             String url = "http://" + WebViewBridgeManager.FILE_LOCAL_HOST + "?file=" + filePath;
                             JSONObject resultData = new JSONObject();
                             resultData.put("filePath", filePath);
@@ -192,6 +196,7 @@ public class DefaultMethodHandler implements MethodHandler {
                 }
                 mCaptureVideoCallbackHandler = null;
                 break;
+            case REQUEST_PICK_FILE:
             case REQUEST_PICK_IMAGE:
             case REQUEST_PICK_VIDEO:
             case REQUEST_PICK_AUDIO:
@@ -232,7 +237,9 @@ public class DefaultMethodHandler implements MethodHandler {
                                     cursor.close();
                                 }
                             } else {
-                                String filePath = Tools.getFilePathFromMediaStoreUri(manager.activity, contentUri);
+                                String filePath = Tools.getFilePathFromUri(manager.activity, contentUri);
+                                if (filePath == null)
+                                    throw new FileNotFoundException("Not found the filePath from uri " + contentUri);
                                 String url = "http://" + WebViewBridgeManager.FILE_LOCAL_HOST + "?file=" + filePath;
                                 resultData.put("filePath", filePath);
                                 resultData.put("url", url);
@@ -601,18 +608,11 @@ public class DefaultMethodHandler implements MethodHandler {
         }
     }
 
-    protected File getImageFile() throws IOException {
-        @SuppressLint("SimpleDateFormat")
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date(System.currentTimeMillis()));
-        String imageFileName = "JPEG_" + timeStamp + ".jpg";
-        return new File(manager.activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES), imageFileName);
-    }
-
     public void captureImage(JSONObject params, MethodCallbackHandler callbackHandler) {
         manager.activity.runOnUiThread(() -> {
             try {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                File imageFile = getImageFile();
+                File imageFile = Tools.createImageFile(manager.activity);
                 Log.d(WebViewBridgeManager.TAG, "captureImage imageFile=" + imageFile.getAbsolutePath());
                 Uri imageUri = FileProvider.getUriForFile(manager.activity, manager.activity.getPackageName() + ".fileProvider", imageFile);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
@@ -637,49 +637,45 @@ public class DefaultMethodHandler implements MethodHandler {
 
     public void pickContent(JSONObject params, MethodCallbackHandler callbackHandler) {
         manager.activity.runOnUiThread(() -> {
-            String type = "image";
+            String type = "file";
             try {
                 type = params.getString("type");
             } catch (JSONException e) {
 //                throw new RuntimeException(e);
             }
-            Uri conentUri = null;
+            Intent intent = null;
             int requestCode;
             switch (type) {
+                case "file":
+                    intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.setType("*/*");
+//                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    requestCode = REQUEST_PICK_FILE;
+                    break;
                 case "image":
-                    conentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                    intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     requestCode = REQUEST_PICK_IMAGE;
                     break;
                 case "video":
-                    conentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                    intent = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
                     requestCode = REQUEST_PICK_VIDEO;
                     break;
                 case "audio":
-                    conentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                    intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
                     requestCode = REQUEST_PICK_AUDIO;
                     break;
                 case "contacts":
-                    conentUri = ContactsContract.Contacts.CONTENT_URI;
+                    intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
                     requestCode = REQUEST_PICK_CONTACTS;
                     break;
                 default:
                     callbackHandler.notifyErrorCallback(new NoSuchFieldException("The pickContent unsupported the " + type + " type."));
                     return;
             }
-            Intent intent = new Intent(Intent.ACTION_PICK, conentUri);
             mPickContentCallbackHandler = callbackHandler;
             manager.activity.startActivityForResult(intent, requestCode);
         });
     }
-
-//    public void getContent(JSONObject params, MethodCallbackHandler callbackHandler) {
-//        manager.activity.runOnUiThread(() -> {
-//            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//            intent.setType("image/*");
-//            mPickContentCallbackHandler = callbackHandler;
-//            manager.activity.startActivityForResult(intent, REQUEST_PICK_IMAGE);
-//        });
-//    }
 
     public void exitApp(JSONObject params, MethodCallbackHandler callbackHandler) {
         boolean force = false;
