@@ -289,7 +289,15 @@
             console.log("onMessage:", message);
             receiveMessage.innerText = JSON.stringify(message, null, 2);
             switch (message.type) {
-                case 'configurationChanged': //横竖屏切换事件
+                case 'onPause': //Activity暂停事件，如手机锁屏、熄屏等
+                    break;
+                case 'onResume': //Activity继续事件，如手机解锁、亮屏等
+                    break;
+                case 'onDestroy': //Activity销毁事件
+                    break
+                case 'onWindowFocusChanged': //窗口焦点改变事件
+                    break;
+                case 'onConfigurationChanged': //屏幕变化事件，如横竖屏切换，尺寸变化等
                     break;
             }
         });

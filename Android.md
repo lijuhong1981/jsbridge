@@ -31,7 +31,43 @@ protected void onActivityResult(int requestCode, int resultCode, @Nullable Inten
 }
 ```
 
-在Activity的onConfigurationChanged方法下添加如下代码
+如需要Activity暂停与继续(如手机锁屏、解锁等)事件，请添加如下代码
+
+```java
+@Override
+protected void onPause() {
+    super.onPause();
+    mManager.onPause();
+}
+
+@Override
+protected void onResume() {
+    super.onResume();
+    mManager.onResume();
+}
+```
+
+如需要Activity销毁事件，请添加如下代码
+
+```java
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    mManager.onDestroy();
+}
+```
+
+如需要Activity窗口焦点变化事件，请添加如下代码
+
+```java
+@Override
+public void onWindowFocusChanged(boolean hasFocus) {
+    super.onWindowFocusChanged(hasFocus);
+    mManager.onWindowFocusChanged(hasFocus);
+}
+```
+
+如需要屏幕变化事件，如横竖屏切换等，请添加如下代码
 
 ```java
 @Override
@@ -45,6 +81,7 @@ public void onConfigurationChanged(@NonNull Configuration newConfig) {
 
 ```java
 JSONObject body = new JSONObject();
+// TODO 往body中添加数据
 ...
 Message msg = new Message();
 // msg.id = ""; //消息id，不指定则由postMessage函数随机生成

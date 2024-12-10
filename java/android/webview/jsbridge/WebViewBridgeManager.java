@@ -130,15 +130,40 @@ public class WebViewBridgeManager {
         return mUploadFileHandler;
     }
 
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (mMethodHandler != null)
-            mMethodHandler.onActivityResult(requestCode, resultCode, data);
+    public void onPause() {
+        Message msg = new Message();
+        msg.type = "onPause";
+        postMessage(msg);
+    }
+
+    public void onResume() {
+        Message msg = new Message();
+        msg.type = "onResume";
+        postMessage(msg);
+    }
+
+    public void onDestroy() {
+            Message msg = new Message();
+            msg.type = "onDestroy";
+            postMessage(msg);
+    }
+
+    public void onWindowFocusChanged(boolean hasFocus) {
+        try {
+            Message msg = new Message();
+            msg.type = "onWindowFocusChanged";
+            msg.body = new JSONObject();
+            msg.body.put("hasFocus", hasFocus);
+            postMessage(msg);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         try {
             Message msg = new Message();
-            msg.type = "configurationChanged";
+            msg.type = "onConfigurationChanged";
             msg.body = new JSONObject();
             msg.body.put("orientation", Tools.getOrientationString(newConfig.orientation));
             msg.body.put("fontScale", newConfig.fontScale);
@@ -163,6 +188,11 @@ public class WebViewBridgeManager {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (mMethodHandler != null)
+            mMethodHandler.onActivityResult(requestCode, resultCode, data);
     }
 
     public void registerMessageReceiver(@NonNull MessageReceiver handler) {
@@ -311,12 +341,12 @@ public class WebViewBridgeManager {
     }
 
     class MyWebChromeClient extends WebChromeClient {
-        @Override
-        public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-            Log.d(TAG, consoleMessage.message() + " -- From line " +
-                    consoleMessage.lineNumber() + " of " + consoleMessage.sourceId());
-            return true;
-        }
+//        @Override
+//        public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+//            Log.d(TAG, consoleMessage.message() + " -- From line " +
+//                    consoleMessage.lineNumber() + " of " + consoleMessage.sourceId());
+//            return true;
+//        }
 
         @Override
         public void onProgressChanged(WebView view, int newProgress) {

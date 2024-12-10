@@ -143,7 +143,7 @@ public class DefaultMethodHandler implements MethodHandler {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        Log.v(WebViewBridgeManager.TAG, "onActivityResult requestCode: " + requestCode + " ; resultCode: " + resultCode + " ; data: " + data);
+//        Log.v(WebViewBridgeManager.TAG, "onActivityResult requestCode: " + requestCode + " ; resultCode: " + resultCode + " ; data: " + data);
         switch (requestCode) {
             case REQUEST_CAPTURE_IMAGE:
                 switch (resultCode) {
