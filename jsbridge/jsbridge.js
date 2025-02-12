@@ -61,7 +61,7 @@
       return value !== undefined && value !== null;
   }
 
-  function isValid(value) {
+  function isValid$1(value) {
       if (value === undefined || value === null || (typeof value === 'number' && isNaN(value)))
           return false;
       return true;
@@ -97,7 +97,7 @@
   };
 
   Check.valid = function (name, test) {
-      if (!isValid(test)) {
+      if (!isValid$1(test)) {
           throw new Error(getInvalidErrorMessage(name));
       }
   };
@@ -308,6 +308,10 @@
               test);
       }
   };
+
+  function isFunction(value) {
+      return typeof value === 'function';
+  }
 
   function destroyHTMLElementImpl(element, deepChildren) {
       if (element.parentNode)
@@ -677,6 +681,14 @@
   */
 
   /**
+   * 检查当前jsbridge是否可用
+   * @returns {boolean}
+   */
+  function isValid() {
+      return window.jsbridgeInterface && isFunction(window.jsbridgeInterface.onBridgeMessage);
+  }
+
+  /**
    * 向app端发送消息
    * @param {object} message 发送的消息对象
    * @param {string} message.type 消息类型，必填项
@@ -749,6 +761,7 @@
   window.onBridgeMessage = onReceiveMessage;
 
   exports.callMethod = callMethod;
+  exports.isValid = isValid;
   exports.onMessage = onMessage;
   exports.postMessage = postMessage;
 

@@ -61,7 +61,7 @@
 
         const uiParams = {
             type: 'type',
-            method: 'methodTest',
+            methodName: 'methodTest',
             key1: 'key1',
             value1: 'value1',
             key2: 'key2',
@@ -79,7 +79,7 @@
                 const params = {};
                 params[uiParams.key1] = uiParams.value1;
                 params[uiParams.key2] = uiParams.value2;
-                jsbridge.callMethod(uiParams.method, params, function (result) {
+                jsbridge.callMethod(uiParams.methodName, params, function (result) {
                     console.log('onCallback:', result);
                     responseContent.innerText = JSON.stringify(result);
                 });
@@ -276,6 +276,32 @@
                         }
                 });
             },
+            fileUrl: location.origin + '/demo/test.pdf',
+            downloadFile: function() {
+                jsbridge.callMethod('downloadFile', {
+                    url: uiParams.fileUrl,
+                }, function(result) {
+                    console.log('downloadFile result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                    if (result.success)
+                        if (result.data.status === 'partial') { //下载部分
+                            // 计算上传进度
+                            const process = result.data.bytesWritten / result.data.totalBytes;
+                            console.log('downloadFile process: ' + process);
+                        } else if (result.data.status === 'complete') { //下载完成
+                            uiParams.filePath = result.data.filePath;
+                        }
+                });
+            },
+            viewFile: function () {
+                jsbridge.callMethod('viewFile', {
+                    url: uiParams.filePath, //文件url
+                    // type: 'application/pdf', //文件MIME Type，可不填，由程序根据文件扩展名自动匹配
+                }, function (result) {
+                    console.log('viewFile result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                });
+            },
             force: false,
             exitApp: function () {
                 // 退出APP
@@ -306,7 +332,7 @@
         gui.open();
 
         // gui.add(uiParams, 'type');
-        gui.add(uiParams, 'method');
+        gui.add(uiParams, 'methodName');
         gui.add(uiParams, 'key1');
         gui.add(uiParams, 'value1');
         gui.add(uiParams, 'key2');
@@ -346,6 +372,9 @@
         gui.add(uiParams, 'uploadUrl');
         gui.add(uiParams, 'filePath').listen();
         gui.add(uiParams, 'uploadFile');
+        gui.add(uiParams, 'fileUrl');
+        gui.add(uiParams, 'downloadFile');
+        gui.add(uiParams, 'viewFile');
         gui.add(uiParams, 'force');
         gui.add(uiParams, 'exitApp');
     </script>

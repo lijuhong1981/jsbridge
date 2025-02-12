@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import Check from '@lijuhong1981/jscheck/src/Check.js';
+import isFunction from '@lijuhong1981/jscheck/src/isFunction.js';
 import EventSubscriber from '@lijuhong1981/jsevents/src/EventSubscriber.js';
 
 const messageCallbacks = {};
@@ -32,6 +33,14 @@ const onMessage = new EventSubscriber();
  * @callback MethodCallback
  * @param {ResultData} result 执行结果对象
 */
+
+/**
+ * 检查当前jsbridge是否可用
+ * @returns {boolean}
+ */
+function isValid() {
+    return window.jsbridgeInterface && isFunction(window.jsbridgeInterface.onBridgeMessage);
+}
 
 /**
  * 向app端发送消息
@@ -106,6 +115,7 @@ function onReceiveMessage(json) {
 window.onBridgeMessage = onReceiveMessage;
 
 export {
+    isValid,
     onMessage,
     postMessage,
     callMethod,

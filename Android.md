@@ -168,3 +168,17 @@ mManager.setUploadFileHandler(new UploadFileHandler() {
     }
 });
 ```
+
+## 文件下载
+
+代码中已内置了一个DefaultDownloadFileHandler类，实现了基础的文件下载，WebViewBridgeManager初始化时会默认使用该类，也可通过WebViewBridgeManager的setDownloadFileHandler接口来实现自己的文件下载
+
+```java
+mManager.setDownloadFileHandler(new DownloadFileHandler() {
+    @Override
+    public void downloadFile(JSONObject params, MethodCallbackHandler callbackHandler) {
+        String url = params.getString("url"); //下载地址
+        // TODO
+    }
+});
+```

@@ -55,7 +55,7 @@ function isDefined(value) {
     return value !== undefined && value !== null;
 }
 
-function isValid(value) {
+function isValid$1(value) {
     if (value === undefined || value === null || (typeof value === 'number' && isNaN(value)))
         return false;
     return true;
@@ -91,7 +91,7 @@ Check.defined = function (name, test) {
 };
 
 Check.valid = function (name, test) {
-    if (!isValid(test)) {
+    if (!isValid$1(test)) {
         throw new Error(getInvalidErrorMessage(name));
     }
 };
@@ -302,6 +302,10 @@ Check.equals = function (name, test, target) {
             test);
     }
 };
+
+function isFunction(value) {
+    return typeof value === 'function';
+}
 
 function destroyHTMLElementImpl(element, deepChildren) {
     if (element.parentNode)
@@ -671,6 +675,14 @@ const onMessage = new EventSubscriber();
 */
 
 /**
+ * 检查当前jsbridge是否可用
+ * @returns {boolean}
+ */
+function isValid() {
+    return window.jsbridgeInterface && isFunction(window.jsbridgeInterface.onBridgeMessage);
+}
+
+/**
  * 向app端发送消息
  * @param {object} message 发送的消息对象
  * @param {string} message.type 消息类型，必填项
@@ -742,5 +754,5 @@ function onReceiveMessage(json) {
 
 window.onBridgeMessage = onReceiveMessage;
 
-export { callMethod, onMessage, postMessage };
+export { callMethod, isValid, onMessage, postMessage };
 //# sourceMappingURL=jsbridge.esm.js.map
