@@ -55,7 +55,7 @@ function isDefined(value) {
     return value !== undefined && value !== null;
 }
 
-function isValid$1(value) {
+function isValid(value) {
     if (value === undefined || value === null || (typeof value === 'number' && isNaN(value)))
         return false;
     return true;
@@ -91,7 +91,7 @@ Check.defined = function (name, test) {
 };
 
 Check.valid = function (name, test) {
-    if (!isValid$1(test)) {
+    if (!isValid(test)) {
         throw new Error(getInvalidErrorMessage(name));
     }
 };
@@ -302,10 +302,6 @@ Check.equals = function (name, test, target) {
             test);
     }
 };
-
-function isFunction(value) {
-    return typeof value === 'function';
-}
 
 function destroyHTMLElementImpl(element, deepChildren) {
     if (element.parentNode)
@@ -678,8 +674,16 @@ const onMessage = new EventSubscriber();
  * 检查当前jsbridge是否可用
  * @returns {boolean}
  */
-function isValid() {
-    return window.jsbridgeInterface && isFunction(window.jsbridgeInterface.onBridgeMessage);
+function checkValid() {
+    if (!window.jsbridgeInterface) {
+        console.warn('not found the window.jsbridgeInterface object.');
+        return false;
+    }
+    if (typeof window.jsbridgeInterface.onBridgeMessage !== 'function') {
+        console.warn('the window.jsbridgeInterface.onBridgeMessage is not function.', window.jsbridgeInterface);
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -694,14 +698,8 @@ function isValid() {
 function postMessage(message, callback) {
     Check.defined('message', message);
     Check.typeOf.string('type', message.type);
-    if (!window.jsbridgeInterface) {
-        console.warn('not found window.jsbridgeInterface object');
+    if (!checkValid())
         return false;
-    }
-    if (typeof window.jsbridgeInterface.onBridgeMessage !== 'function') {
-        console.warn('window.jsbridgeInterface.onBridgeMessage is not function', window.jsbridgeInterface.onBridgeMessage);
-        return false;
-    }
     if (!message.id)
         message.id = v4();
     if (!message.body)
@@ -754,5 +752,5 @@ function onReceiveMessage(json) {
 
 window.onBridgeMessage = onReceiveMessage;
 
-export { callMethod, isValid, onMessage, postMessage };
+export { callMethod, checkValid as isValid, onMessage, postMessage };
 //# sourceMappingURL=jsbridge.esm.js.map

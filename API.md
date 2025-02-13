@@ -15,7 +15,7 @@ Details about the classes, methods, and properties provided by pcircs.
 ## Functions
 
 <dl>
-<dt><a href="#isValid">isValid()</a> ⇒ <code>boolean</code></dt>
+<dt><a href="#checkValid">checkValid()</a> ⇒ <code>boolean</code></dt>
 <dd><p>检查当前jsbridge是否可用</p>
 </dd>
 <dt><a href="#postMessage">postMessage(message, callback)</a> ⇒ <code>string</code> | <code>false</code></dt>
@@ -50,9 +50,9 @@ Details about the classes, methods, and properties provided by pcircs.
 ```js
 onMessage.addEventListener((message) => {});
 ```
-<a name="isValid"></a>
+<a name="checkValid"></a>
 
-## isValid() ⇒ <code>boolean</code>
+## checkValid() ⇒ <code>boolean</code>
 检查当前jsbridge是否可用
 
 **Kind**: global function  

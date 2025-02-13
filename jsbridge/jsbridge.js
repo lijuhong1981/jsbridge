@@ -61,7 +61,7 @@
       return value !== undefined && value !== null;
   }
 
-  function isValid$1(value) {
+  function isValid(value) {
       if (value === undefined || value === null || (typeof value === 'number' && isNaN(value)))
           return false;
       return true;
@@ -97,7 +97,7 @@
   };
 
   Check.valid = function (name, test) {
-      if (!isValid$1(test)) {
+      if (!isValid(test)) {
           throw new Error(getInvalidErrorMessage(name));
       }
   };
@@ -308,10 +308,6 @@
               test);
       }
   };
-
-  function isFunction(value) {
-      return typeof value === 'function';
-  }
 
   function destroyHTMLElementImpl(element, deepChildren) {
       if (element.parentNode)
@@ -684,8 +680,16 @@
    * 检查当前jsbridge是否可用
    * @returns {boolean}
    */
-  function isValid() {
-      return window.jsbridgeInterface && isFunction(window.jsbridgeInterface.onBridgeMessage);
+  function checkValid() {
+      if (!window.jsbridgeInterface) {
+          console.warn('not found the window.jsbridgeInterface object.');
+          return false;
+      }
+      if (typeof window.jsbridgeInterface.onBridgeMessage !== 'function') {
+          console.warn('the window.jsbridgeInterface.onBridgeMessage is not function.', window.jsbridgeInterface);
+          return false;
+      }
+      return true;
   }
 
   /**
@@ -700,14 +704,8 @@
   function postMessage(message, callback) {
       Check.defined('message', message);
       Check.typeOf.string('type', message.type);
-      if (!window.jsbridgeInterface) {
-          console.warn('not found window.jsbridgeInterface object');
+      if (!checkValid())
           return false;
-      }
-      if (typeof window.jsbridgeInterface.onBridgeMessage !== 'function') {
-          console.warn('window.jsbridgeInterface.onBridgeMessage is not function', window.jsbridgeInterface.onBridgeMessage);
-          return false;
-      }
       if (!message.id)
           message.id = v4();
       if (!message.body)
@@ -761,7 +759,7 @@
   window.onBridgeMessage = onReceiveMessage;
 
   exports.callMethod = callMethod;
-  exports.isValid = isValid;
+  exports.isValid = checkValid;
   exports.onMessage = onMessage;
   exports.postMessage = postMessage;
 
