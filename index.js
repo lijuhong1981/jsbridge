@@ -116,7 +116,7 @@ function onReceiveMessage(json) {
 window.onBridgeMessage = onReceiveMessage;
 
 export {
-    checkValid as isValid,
+    checkValid,
     onMessage,
     postMessage,
     callMethod,

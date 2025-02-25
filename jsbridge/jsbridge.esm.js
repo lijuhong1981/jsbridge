@@ -752,5 +752,5 @@ function onReceiveMessage(json) {
 
 window.onBridgeMessage = onReceiveMessage;
 
-export { callMethod, checkValid as isValid, onMessage, postMessage };
+export { callMethod, checkValid, onMessage, postMessage };
 //# sourceMappingURL=jsbridge.esm.js.map

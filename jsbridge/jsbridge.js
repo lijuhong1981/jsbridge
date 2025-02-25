@@ -759,7 +759,7 @@
   window.onBridgeMessage = onReceiveMessage;
 
   exports.callMethod = callMethod;
-  exports.isValid = checkValid;
+  exports.checkValid = checkValid;
   exports.onMessage = onMessage;
   exports.postMessage = postMessage;
 
