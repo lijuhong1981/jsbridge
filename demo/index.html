@@ -51,6 +51,18 @@
             'portrait', //竖屏
             'landscape' //横屏
         ];
+        const muteTypes = [
+            'microphone', //麦克风
+            'speaker', //扬声器
+        ];
+        const audioTypes = [
+            'voice', //通话语音
+            'system', //系统音
+            'ring', //铃声
+            'music', //多媒体
+            'alarm', //闹钟
+            'notification', //通知
+        ];
         const contentTypes = [
             'file', //任意文件
             'image', //图片
@@ -160,43 +172,27 @@
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
-            speakerOn: true,
-            setSpeakerOn: function () {
-                // 开关扬声器
-                jsbridge.callMethod('setSpeakerOn', {
-                    value: uiParams.speakerOn,
+            muteType:muteTypes[0],
+            isMute: true,
+            setMute: function () {
+                // 静音/取消静音
+                jsbridge.callMethod('setMute', {
+                    type: uiParams.muteType, //设备类型，麦克风或扬声器，参见muteTypes
+                    mute: uiParams.isMute, //是否静音，true为静音，false取消静音
                 }, function (result) {
-                    console.log('setSpeakerOn result:', result);
+                    console.log('setMute result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
-            microphoneOn: true,
-            setMicrophoneOn: function () {
-                // 开关扬声器
-                jsbridge.callMethod('setMicrophoneOn', {
-                    value: uiParams.microphoneOn,
+            audioType:audioTypes[0],
+            volume: 5,
+            setAudioVolume: function () {
+                // 设置音量
+                jsbridge.callMethod('setAudioVolume', {
+                    type: uiParams.audioType, //音频类型，参见audioTypes
+                    volume: uiParams.volume, //音量，范围0-15
                 }, function (result) {
-                    console.log('setMicrophoneOn result:', result);
-                    responseContent.innerText = JSON.stringify(result, null, 2);
-                });
-            },
-            mediaVolume: 5,
-            setMediaVolume: function () {
-                // 设置多媒体音量
-                jsbridge.callMethod('setMediaVolume', {
-                    value: uiParams.mediaVolume,
-                }, function (result) {
-                    console.log('setMediaVolume result:', result);
-                    responseContent.innerText = JSON.stringify(result, null, 2);
-                });
-            },
-            voiceVolume: 5,
-            setVoiceVolume: function () {
-                // 设置通话音量
-                jsbridge.callMethod('setVoiceVolume', {
-                    value: uiParams.voiceVolume,
-                }, function (result) {
-                    console.log('setVoiceVolume result:', result);
+                    console.log('setAudioVolume result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
@@ -355,14 +351,13 @@
         gui.add(uiParams, 'getAudioInfo');
         gui.add(uiParams, 'orientation', orientations);
         gui.add(uiParams, 'setOrientation');
-        gui.add(uiParams, 'speakerOn');
-        gui.add(uiParams, 'setSpeakerOn');
-        gui.add(uiParams, 'microphoneOn');
-        gui.add(uiParams, 'setMicrophoneOn');
-        gui.add(uiParams, 'mediaVolume');
-        gui.add(uiParams, 'setMediaVolume');
-        gui.add(uiParams, 'voiceVolume');
-        gui.add(uiParams, 'setVoiceVolume');
+        gui.add(uiParams, 'muteType', muteTypes);
+        gui.add(uiParams, 'isMute');
+        gui.add(uiParams, 'setMute');
+        gui.add(uiParams, 'audioType', audioTypes);
+        gui.add(uiParams, 'volume');
+        gui.add(uiParams, 'setAudioVolume');
+        gui.add(uiParams, 'phoneNumber');
         gui.add(uiParams, 'dialPhone');
         gui.add(uiParams, 'callPhone');
         gui.add(uiParams, 'captureImage');
