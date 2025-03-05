@@ -10,7 +10,6 @@ import android.net.http.SslError;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
-import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 import android.webkit.PermissionRequest;
@@ -22,6 +21,27 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webview.jsbridge.methods.CallPhoneHandler;
+import android.webview.jsbridge.methods.CaptureImageHandler;
+import android.webview.jsbridge.methods.CaptureVideoHandler;
+import android.webview.jsbridge.methods.DialPhoneHandler;
+import android.webview.jsbridge.methods.DownloadFileHandler;
+import android.webview.jsbridge.methods.ExitAppHandler;
+import android.webview.jsbridge.methods.GetAppInfoHandler;
+import android.webview.jsbridge.methods.GetAudioInfoHandler;
+import android.webview.jsbridge.methods.GetConfigurationInfoHandler;
+import android.webview.jsbridge.methods.GetDeviceInfoHandler;
+import android.webview.jsbridge.methods.GetDisplayInfoHandler;
+import android.webview.jsbridge.methods.PickContentHandler;
+import android.webview.jsbridge.methods.SetAudioVolumeHandler;
+import android.webview.jsbridge.methods.SetMicrophoneOnHandler;
+import android.webview.jsbridge.methods.SetMuteHandler;
+import android.webview.jsbridge.methods.SetOrientationHandler;
+import android.webview.jsbridge.methods.SetSpeakerOnHandler;
+import android.webview.jsbridge.methods.ShowAlertDialogHandler;
+import android.webview.jsbridge.methods.ShowToastHandler;
+import android.webview.jsbridge.methods.UploadFileHandler;
+import android.webview.jsbridge.methods.ViewFileHandler;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +52,9 @@ import org.json.JSONObject;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -43,8 +66,7 @@ public class WebViewBridgeManager {
     public final WebView webView;
     public final WebSettings webSettings;
     private final ArrayList<MessageReceiver> mMessageReceivers = new ArrayList<>();
-    private MethodHandler mMethodHandler;
-    private UploadFileHandler mUploadFileHandler;
+    private final Map<String, MethodHandler> mMethodHandlers = new HashMap<>();
 
     @SuppressLint("SetJavaScriptEnabled")
     public WebViewBridgeManager(@NonNull Activity activity, @NonNull WebView webView, @Nullable WebSettingsOptions options) {
@@ -108,26 +130,7 @@ public class WebViewBridgeManager {
         this.webView.addJavascriptInterface(new AndroidInterface(), "jsbridgeInterface");
         this.webView.setWebViewClient(new MyWebViewClient());
         this.webView.setWebChromeClient(new MyWebChromeClient());
-        mMethodHandler = new DefaultMethodHandler(this);
-        mUploadFileHandler = new DefaultUploadFileHandler();
-    }
-
-    public void setMethodHandler(@Nullable MethodHandler handler) {
-        if (mMethodHandler != handler)
-            mMethodHandler = handler;
-    }
-
-    public MethodHandler getMethodHandler() {
-        return mMethodHandler;
-    }
-
-    public void setUploadFileHandler(@NonNull UploadFileHandler handler) {
-        if (mUploadFileHandler != handler)
-            mUploadFileHandler = handler;
-    }
-
-    public UploadFileHandler getUploadFileHandler() {
-        return mUploadFileHandler;
+        registerDefaultMethodHandlers();
     }
 
     public void onPause() {
@@ -139,6 +142,12 @@ public class WebViewBridgeManager {
     public void onResume() {
         Message msg = new Message();
         msg.type = "onResume";
+        postMessage(msg);
+    }
+
+    public void onStop() {
+        Message msg = new Message();
+        msg.type = "onStop";
         postMessage(msg);
     }
 
@@ -191,17 +200,22 @@ public class WebViewBridgeManager {
     }
 
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (mMethodHandler != null)
-            mMethodHandler.onActivityResult(requestCode, resultCode, data);
+        for (MethodHandler handler: mMethodHandlers.values()) {
+            if (handler.hasActivityResult()) {
+                List<Integer> requestCodes = handler.getRequestCodes();
+                if (requestCodes.contains(requestCode))
+                    handler.onActivityResult(requestCode, resultCode, data);
+            }
+        }
     }
 
-    public void registerMessageReceiver(@NonNull MessageReceiver handler) {
-        if (!mMessageReceivers.contains(handler))
-            mMessageReceivers.add(handler);
+    public void registerMessageReceiver(@NonNull MessageReceiver receiver) {
+        if (!mMessageReceivers.contains(receiver))
+            mMessageReceivers.add(receiver);
     }
 
-    public void unregisterMessageReceiver(@NonNull MessageReceiver handler) {
-        mMessageReceivers.remove(handler);
+    public void unregisterMessageReceiver(@NonNull MessageReceiver receiver) {
+        mMessageReceivers.remove(receiver);
     }
 
     private void notifyMessageReceivers(@NonNull Message message) {
@@ -211,21 +225,55 @@ public class WebViewBridgeManager {
         }
     }
 
+    public void registerMethodHander(MethodHandler handler) {
+        mMethodHandlers.put(handler.getMethod(), handler);
+    }
+
+    public void unregisterMethodHandler(MethodHandler handler) {
+        mMethodHandlers.remove(handler.getMethod());
+    }
+
+    private void registerDefaultMethodHandlers() {
+        registerMethodHander(new ShowToastHandler(activity));
+        registerMethodHander(new ShowAlertDialogHandler(activity));
+        registerMethodHander(new GetAppInfoHandler(activity));
+        registerMethodHander(new GetDeviceInfoHandler(activity));
+        registerMethodHander(new GetDisplayInfoHandler(activity));
+        registerMethodHander(new GetConfigurationInfoHandler(activity));
+        registerMethodHander(new GetAudioInfoHandler(activity));
+        registerMethodHander(new SetOrientationHandler(activity));
+        registerMethodHander(new SetMicrophoneOnHandler(activity));
+        registerMethodHander(new SetSpeakerOnHandler(activity));
+        registerMethodHander(new SetMuteHandler(activity));
+        registerMethodHander(new SetAudioVolumeHandler(activity));
+        registerMethodHander(new DialPhoneHandler(activity));
+        registerMethodHander(new CallPhoneHandler(activity));
+        registerMethodHander(new CaptureImageHandler(activity));
+        registerMethodHander(new CaptureVideoHandler(activity));
+        registerMethodHander(new PickContentHandler(activity));
+        registerMethodHander(new ViewFileHandler(activity));
+        registerMethodHander(new ExitAppHandler(activity));
+        registerMethodHander(new UploadFileHandler(activity));
+        registerMethodHander(new DownloadFileHandler(activity));
+    }
+
     private void notifyMethodHandler(@NonNull Message message) {
         try {
             String method = message.body.getString("method");
             JSONObject params = message.body.getJSONObject("params");
             MethodCallbackHandler callbackHandler = new MethodCallbackHandler(this, message.id);
-            if (mMethodHandler != null)
-                mMethodHandler.onMethod(method, params, callbackHandler);
+            MethodHandler handler = mMethodHandlers.get(method);
+            if (handler != null)
+                handler.handleMethod(params, callbackHandler);
+            else
+                callbackHandler.notifyErrorCallback(new NoSuchMethodError("The method " + method + " has unregistered."));
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void postMessage(@NonNull JSONObject jsonObject) {
+    public void postMessage(@NonNull String jsonString) {
         activity.runOnUiThread(() -> {
-            String jsonString = jsonObject.toString();
             Log.d(TAG, "postMessageToWeb: " + jsonString);
             String script = String.format("onBridgeMessage('%s');", jsonString);
             webView.evaluateJavascript(script, null);
@@ -244,7 +292,7 @@ public class WebViewBridgeManager {
             jsonObject.put("body", message.body);
             if (message.persistCallback)
                 jsonObject.put("persistCallback", true);
-            postMessage(jsonObject);
+            postMessage(jsonObject.toString());
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

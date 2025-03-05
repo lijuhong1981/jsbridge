@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MethodCallbackHandler extends MessageCallbackHandler{
+public class MethodCallbackHandler extends MessageCallbackHandler {
 
     public MethodCallbackHandler(@NonNull WebViewBridgeManager manager, @NonNull String callbackMsgId) {
         super(manager, callbackMsgId);
@@ -35,13 +35,14 @@ public class MethodCallbackHandler extends MessageCallbackHandler{
         notifySuccessCallback(new JSONObject());
     }
 
-    public void notifyErrorCallback(@NonNull Throwable error, boolean persistCallback) {
+    public void notifyErrorCallback(@NonNull Throwable error, int code, boolean persistCallback) {
         try {
             JSONObject response = new JSONObject();
             response.put("success", false);
             JSONObject errorInfo = new JSONObject();
             errorInfo.put("class", error.getClass().getSimpleName());
             errorInfo.put("description", error.getMessage());
+            errorInfo.put("code", code);
             response.put("error", errorInfo);
             super.notifyCallback(response, persistCallback);
         } catch (JSONException e) {
@@ -49,7 +50,15 @@ public class MethodCallbackHandler extends MessageCallbackHandler{
         }
     }
 
+    public void notifyErrorCallback(@NonNull Throwable error, int code) {
+        notifyErrorCallback(error, code,false);
+    }
+
+    public void notifyErrorCallback(@NonNull Throwable error, boolean persistCallback) {
+        notifyErrorCallback(error, -1, persistCallback);
+    }
+
     public void notifyErrorCallback(@NonNull Throwable error) {
-        notifyErrorCallback(error, false);
+        notifyErrorCallback(error, -1,false);
     }
 }

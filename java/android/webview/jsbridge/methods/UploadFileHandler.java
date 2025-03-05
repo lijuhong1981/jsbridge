@@ -1,7 +1,12 @@
-package android.webview.jsbridge;
+package android.webview.jsbridge.methods;
 
+import android.app.Activity;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
+import android.webview.jsbridge.MethodCallbackHandler;
+import android.webview.jsbridge.WebViewBridgeManager;
+
+import androidx.annotation.NonNull;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,33 +20,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Iterator;
 
-public class DefaultUploadFileHandler implements UploadFileHandler {
-    private void notifyPartialCallback(MethodCallbackHandler callbackHandler, long bytesWritten, long totalBytes) {
-        try {
-            JSONObject resultData = new JSONObject();
-            resultData.put("bytesWritten", bytesWritten);
-            resultData.put("totalBytes", totalBytes);
-            resultData.put("status", "partial");
-            callbackHandler.notifySuccessCallback(resultData, true);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void notifyCompleteCallback(MethodCallbackHandler callbackHandler, long totalBytes) {
-        try {
-            JSONObject resultData = new JSONObject();
-            resultData.put("bytesWritten", totalBytes);
-            resultData.put("totalBytes", totalBytes);
-            resultData.put("status", "complete");
-            callbackHandler.notifySuccessCallback(resultData);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+public class UploadFileHandler extends NoActivityResultMethodHandler {
+    public UploadFileHandler(@NonNull Activity activity) {
+        super(activity);
     }
 
     @Override
-    public void uploadFile(JSONObject params, MethodCallbackHandler callbackHandler) {
+    public String getMethod() {
+        return "uploadFile";
+    }
+
+    @Override
+    public void handleMethod(@NonNull JSONObject params, @NonNull MethodCallbackHandler callbackHandler) {
         new Thread(() -> {
             try {
                 String uploadUrl = params.getString("uploadUrl");
@@ -49,8 +39,7 @@ public class DefaultUploadFileHandler implements UploadFileHandler {
                 JSONObject headers = null;
                 try {
                     headers = params.getJSONObject("headers");
-                } catch (JSONException e) {
-//                    throw new RuntimeException(e);
+                } catch (JSONException ignored) {
                 }
 
                 File file = new File(filePath);
@@ -108,5 +97,29 @@ public class DefaultUploadFileHandler implements UploadFileHandler {
                 callbackHandler.notifyErrorCallback(e);
             }
         }).start();
+    }
+
+    private void notifyPartialCallback(MethodCallbackHandler callbackHandler, long bytesWritten, long totalBytes) {
+        try {
+            JSONObject resultData = new JSONObject();
+            resultData.put("bytesWritten", bytesWritten);
+            resultData.put("totalBytes", totalBytes);
+            resultData.put("status", "partial");
+            callbackHandler.notifySuccessCallback(resultData, true);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void notifyCompleteCallback(MethodCallbackHandler callbackHandler, long totalBytes) {
+        try {
+            JSONObject resultData = new JSONObject();
+            resultData.put("bytesWritten", totalBytes);
+            resultData.put("totalBytes", totalBytes);
+            resultData.put("status", "complete");
+            callbackHandler.notifySuccessCallback(resultData);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
