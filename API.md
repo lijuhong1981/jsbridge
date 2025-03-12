@@ -10,6 +10,9 @@ Details about the classes, methods, and properties provided by pcircs.
 <dt><a href="#onMessage">onMessage</a> : <code>EventSubscriber</code></dt>
 <dd><p>接收app端发送过来的消息</p>
 </dd>
+<dt><a href="#onEvent">onEvent</a> : <code>EventEmitter</code></dt>
+<dd><p>接收app端发送过来的事件，与onMessage的区别在于onEvent将Message对象的type属性作为事件类型，body属性作为事件对象发送</p>
+</dd>
 </dl>
 
 ## Functions
@@ -49,6 +52,16 @@ Details about the classes, methods, and properties provided by pcircs.
 **Example**  
 ```js
 onMessage.addEventListener((message) => {});
+```
+<a name="onEvent"></a>
+
+## onEvent : <code>EventEmitter</code>
+接收app端发送过来的事件，与onMessage的区别在于onEvent将Message对象的type属性作为事件类型，body属性作为事件对象发送
+
+**Kind**: global constant  
+**Example**  
+```js
+onEvent.on('eventType', (event) => {});
 ```
 <a name="checkValid"></a>
 
