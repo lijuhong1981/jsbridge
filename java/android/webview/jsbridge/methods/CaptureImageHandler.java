@@ -28,7 +28,7 @@ public class CaptureImageHandler extends ActivityResultMethodHandler {
     }
 
     @Override
-    void registerRequestCodes() {
+    public void registerRequestCodes() {
         requestCodes.add(RequestCodes.REQUEST_CAPTURE_IMAGE);
     }
 

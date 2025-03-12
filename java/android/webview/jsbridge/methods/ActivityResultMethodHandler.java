@@ -17,7 +17,7 @@ public abstract class ActivityResultMethodHandler implements MethodHandler {
         registerRequestCodes();
     }
 
-    abstract void registerRequestCodes();
+    public abstract void registerRequestCodes();
 
     @Override
     public boolean hasActivityResult() {

@@ -23,7 +23,7 @@ public class CaptureVideoHandler extends ActivityResultMethodHandler {
     }
 
     @Override
-    void registerRequestCodes() {
+    public void registerRequestCodes() {
         requestCodes.add(RequestCodes.REQUEST_CAPTURE_VIDEO);
     }
 

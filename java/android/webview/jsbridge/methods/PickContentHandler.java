@@ -30,7 +30,7 @@ public class PickContentHandler extends ActivityResultMethodHandler {
     }
 
     @Override
-    void registerRequestCodes() {
+    public void registerRequestCodes() {
         requestCodes.add(RequestCodes.REQUEST_PICK_FILE);
         requestCodes.add(RequestCodes.REQUEST_PICK_IMAGE);
         requestCodes.add(RequestCodes.REQUEST_PICK_VIDEO);

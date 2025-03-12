@@ -274,8 +274,12 @@ public class WebViewBridgeManager {
 
     public void postMessage(@NonNull String jsonString) {
         activity.runOnUiThread(() -> {
-            Log.d(TAG, "postMessageToWeb: " + jsonString);
-            String script = String.format("onBridgeMessage('%s');", jsonString);
+            String replaceString = jsonString
+                    .replace("\\r", "\\\\r")
+                    .replace("\\n", "\\\\n")
+                    .replace("\"", "\\\"");
+            Log.d(TAG, "postMessageToWeb: " + replaceString);
+            String script = "onBridgeMessage('" + replaceString + "')";
             webView.evaluateJavascript(script, null);
         });
     }
