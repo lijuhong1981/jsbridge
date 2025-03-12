@@ -1,6 +1,6 @@
 {
   "name": "@lijuhong1981/jsbridge",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "> TODO: description",
   "author": "lijuhong1981 <lijuhong@hotmail.com>",
   "homepage": "https://github.com/lijuhong1981/jsbridge#readme",
@@ -14,7 +14,7 @@
   "files": ["demo", "jsbridge", "Android.md", "API.md", "index.js"],
   "scripts": {
     "build": "npx rollup -c",
-    "build-docs": "jsdoc2md -f index.js | replace-between --target API.md --token API",
+    "build-api": "jsdoc2md -f index.js | replace-between --target API.md --token API",
     "serve": "npx http-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
