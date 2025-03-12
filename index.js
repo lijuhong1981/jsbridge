@@ -1,6 +1,7 @@
-import { v4 as uuidv4 } from 'uuid';
 import Check from '@lijuhong1981/jscheck/src/Check.js';
+import EventEmitter from '@lijuhong1981/jsevents/src/EventEmitter.js';
 import EventSubscriber from '@lijuhong1981/jsevents/src/EventSubscriber.js';
+import { v4 as uuidv4 } from 'uuid';
 
 const messageCallbacks = {};
 
@@ -12,6 +13,15 @@ const messageCallbacks = {};
  * onMessage.addEventListener((message) => {});
 */
 const onMessage = new EventSubscriber();
+
+/**
+ * 接收app端发送过来的事件，与onMessage的区别在于onEvent将Message对象的type属性作为事件类型，body属性作为事件对象发送
+ * @type {EventEmitter}
+ * 
+ * @example
+ * onEvent.on('eventType', (event) => {});
+*/
+const onEvent = new EventEmitter();
 
 /**
  * 消息回调通知
@@ -110,14 +120,12 @@ function onReceiveMessage(json) {
             delete messageCallbacks[message.id];
     } else {
         onMessage.raiseEvent(message);
+        onEvent.emit(message.type, message.body);
     }
 }
 
 window.onBridgeMessage = onReceiveMessage;
 
 export {
-    checkValid,
-    onMessage,
-    postMessage,
-    callMethod,
-}
+    callMethod, checkValid, onEvent, onMessage, postMessage
+};
