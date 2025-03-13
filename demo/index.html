@@ -250,6 +250,7 @@
             uploadUrl: 'http://api.pcitech.online/attachment-service/upload',
             filePath: '',
             uploadFile: function () {
+                // 上传文件
                 jsbridge.callMethod('uploadFile', {
                     uploadUrl: uiParams.uploadUrl, //上传地址，必填
                     filePath: uiParams.filePath, //文件路径，必填
@@ -274,6 +275,7 @@
             },
             fileUrl: location.origin + '/demo/test.pdf',
             downloadFile: function() {
+                // 下载文件
                 jsbridge.callMethod('downloadFile', {
                     url: uiParams.fileUrl,
                 }, function(result) {
@@ -290,11 +292,34 @@
                 });
             },
             viewFile: function () {
+                // 查看文件，需要APP权限支持
                 jsbridge.callMethod('viewFile', {
                     url: uiParams.filePath, //文件url
                     // type: 'application/pdf', //文件MIME Type，可不填，由程序根据文件扩展名自动匹配
                 }, function (result) {
                     console.log('viewFile result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                });
+            },
+            vibratorSeconds: 1,
+            vibratorAmplitude: 128,
+            startVibrator:function() {
+                // 手机震动，需要APP权限支持
+                jsbridge.callMethod('startVibrator', {
+                    milliseconds: uiParams.vibratorSeconds * 1000, //震动时长，单位毫秒，必须是正整数
+                    amplitude: uiParams.vibratorAmplitude, //震动幅度，范围1~255
+                    // timings: [0, 1000], //可选项，震动时间控制数组，以[静止时长, 震动时长, 静止时长, 震动时长, ...]形式，单位毫秒，启用后参数milliseconds失效
+                    // amplitudes: [0, 255], //可选项，震动幅度数组，指定了timings时生效，与timings数组长度必须相等，启用后参数amplitude失效
+                    // repeat: 0, //可选项，震动重复次数，指定了timings时生效，-1表示只震动1次，0表示一直震动
+                }, function (result) {
+                    console.log('startVibrator result:', result);
+                    responseContent.innerText = JSON.stringify(result, null, 2);
+                });
+            },
+            cancelVibrator: function() {
+                // 取消震动
+                jsbridge.callMethod('cancelVibrator', {}, function (result) {
+                    console.log('cancelVibrator result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
@@ -370,6 +395,10 @@
         gui.add(uiParams, 'fileUrl');
         gui.add(uiParams, 'downloadFile');
         gui.add(uiParams, 'viewFile');
+        gui.add(uiParams, 'vibratorSeconds', 1, undefined, 1);
+        gui.add(uiParams, 'vibratorAmplitude', 1, 255, 1);
+        gui.add(uiParams, 'startVibrator');
+        gui.add(uiParams, 'cancelVibrator');
         gui.add(uiParams, 'force');
         gui.add(uiParams, 'exitApp');
     </script>
