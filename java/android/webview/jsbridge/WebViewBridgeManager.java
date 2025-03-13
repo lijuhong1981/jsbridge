@@ -22,6 +22,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webview.jsbridge.methods.CallPhoneHandler;
+import android.webview.jsbridge.methods.CancelVibratorHandler;
 import android.webview.jsbridge.methods.CaptureImageHandler;
 import android.webview.jsbridge.methods.CaptureVideoHandler;
 import android.webview.jsbridge.methods.DialPhoneHandler;
@@ -40,6 +41,7 @@ import android.webview.jsbridge.methods.SetOrientationHandler;
 import android.webview.jsbridge.methods.SetSpeakerOnHandler;
 import android.webview.jsbridge.methods.ShowAlertDialogHandler;
 import android.webview.jsbridge.methods.ShowToastHandler;
+import android.webview.jsbridge.methods.StartVibratorHandler;
 import android.webview.jsbridge.methods.UploadFileHandler;
 import android.webview.jsbridge.methods.ViewFileHandler;
 
@@ -255,6 +257,8 @@ public class WebViewBridgeManager {
         registerMethodHander(new ExitAppHandler(activity));
         registerMethodHander(new UploadFileHandler(activity));
         registerMethodHander(new DownloadFileHandler(activity));
+        registerMethodHander(new StartVibratorHandler(activity));
+        registerMethodHander(new CancelVibratorHandler(activity));
     }
 
     private void notifyMethodHandler(@NonNull Message message) {
