@@ -3,7 +3,6 @@ package android.webview.jsbridge.methods;
 import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.UnsupportedSchemeException;
 import android.util.Log;
 import android.webview.jsbridge.MethodCallbackHandler;
 import android.webview.jsbridge.WebViewBridgeManager;

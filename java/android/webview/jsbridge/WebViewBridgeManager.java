@@ -7,7 +7,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
@@ -94,8 +93,7 @@ public class WebViewBridgeManager {
         webSettings.setMixedContentMode(options.mixedContentMode);
         webSettings.setNeedInitialFocus(options.needInitialFocus);
         webSettings.setOffscreenPreRaster(options.offscreenPreRaster);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            webSettings.setSafeBrowsingEnabled(options.safeBrowsingEnabled);
+        webSettings.setSafeBrowsingEnabled(options.safeBrowsingEnabled);
         webSettings.setSupportMultipleWindows(options.supportMultipleWindows);
         webSettings.setSupportZoom(options.supportZoom);
         webSettings.setUseWideViewPort(options.useWideViewPort);
@@ -192,9 +190,7 @@ public class WebViewBridgeManager {
             msg.body.put("screenHeightDp", newConfig.screenHeightDp);
             msg.body.put("smallestScreenWidthDp", newConfig.smallestScreenWidthDp);
             msg.body.put("densityDpi", newConfig.densityDpi);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                msg.body.put("colorMode", newConfig.colorMode);
-            }
+            msg.body.put("colorMode", newConfig.colorMode);
             postMessage(msg);
         } catch (JSONException e) {
             throw new RuntimeException(e);

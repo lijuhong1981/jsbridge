@@ -1,13 +1,8 @@
 package android.webview.jsbridge;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import org.json.JSONObject;
-
-import java.util.Optional;
 
 public class MessageCallbackHandler {
     private final WebViewBridgeManager mManager;

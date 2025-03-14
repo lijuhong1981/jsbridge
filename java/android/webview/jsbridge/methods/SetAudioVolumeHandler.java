@@ -10,7 +10,6 @@ import android.webview.jsbridge.WebViewBridgeManager;
 
 import androidx.annotation.NonNull;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class SetAudioVolumeHandler extends NoActivityResultMethodHandler {
