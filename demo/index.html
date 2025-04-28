@@ -172,7 +172,7 @@
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
-            muteType:muteTypes[0],
+            muteType: muteTypes[0],
             isMute: true,
             setMute: function () {
                 // 静音/取消静音
@@ -184,7 +184,7 @@
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
-            audioType:audioTypes[0],
+            audioType: audioTypes[0],
             volume: 5,
             setAudioVolume: function () {
                 // 设置音量
@@ -274,11 +274,11 @@
                 });
             },
             fileUrl: location.origin + '/demo/test.pdf',
-            downloadFile: function() {
+            downloadFile: function () {
                 // 下载文件
                 jsbridge.callMethod('downloadFile', {
                     url: uiParams.fileUrl,
-                }, function(result) {
+                }, function (result) {
                     console.log('downloadFile result:', result);
                     responseContent.innerText = JSON.stringify(result, null, 2);
                     if (result.success)
@@ -303,7 +303,7 @@
             },
             vibratorSeconds: 1,
             vibratorAmplitude: 128,
-            startVibrator:function() {
+            startVibrator: function () {
                 // 手机震动，需要APP权限支持
                 jsbridge.callMethod('startVibrator', {
                     milliseconds: uiParams.vibratorSeconds * 1000, //震动时长，单位毫秒，必须是正整数
@@ -316,7 +316,7 @@
                     responseContent.innerText = JSON.stringify(result, null, 2);
                 });
             },
-            cancelVibrator: function() {
+            cancelVibrator: function () {
                 // 取消震动
                 jsbridge.callMethod('cancelVibrator', {}, function (result) {
                     console.log('cancelVibrator result:', result);
@@ -336,15 +336,21 @@
             console.log("onMessage:", message);
             receiveMessage.innerText = JSON.stringify(message, null, 2);
             switch (message.type) {
-                case 'onPause': //Activity暂停事件，如手机锁屏、熄屏等
+                case 'onPause': //Activity暂停事件
                     break;
-                case 'onResume': //Activity继续事件，如手机解锁、亮屏等
+                case 'onResume': //Activity继续事件
+                    break;
+                case 'onStop': //Activity停止事件
                     break;
                 case 'onDestroy': //Activity销毁事件
                     break
                 case 'onWindowFocusChanged': //窗口焦点改变事件
                     break;
                 case 'onConfigurationChanged': //屏幕变化事件，如横竖屏切换，尺寸变化等
+                    break;
+                case 'onScreenOff': //屏幕熄屏事件
+                    break;
+                case 'onScreenOn'://屏幕亮屏事件
                     break;
             }
         });

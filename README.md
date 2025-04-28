@@ -62,7 +62,25 @@ jsbridge.postMessage({ type, body }, callback);
 // 注册消息接收
 jsbridge.onMessage.addEventListener((message) => {
     console.log("onMessage:", message);
-    // TODO
+    switch (message.type) {
+        case 'onPause': //Activity暂停事件
+            break;
+        case 'onResume': //Activity继续事件
+            break;
+        case 'onStop': //Activity停止事件
+            break;
+        case 'onDestroy': //Activity销毁事件
+            break
+        case 'onWindowFocusChanged': //窗口焦点改变事件
+            break;
+        case 'onConfigurationChanged': //屏幕变化事件，如横竖屏切换，尺寸变化等
+            break;
+        case 'onScreenOff': //屏幕熄屏事件
+            break;
+        case 'onScreenOn'://屏幕亮屏事件
+            break;
+        ...
+    }
 });
 ```
 

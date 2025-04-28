@@ -2,7 +2,10 @@ package android.webview.jsbridge;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -68,6 +71,16 @@ public class WebViewBridgeManager {
     public final WebSettings webSettings;
     private final ArrayList<MessageReceiver> mMessageReceivers = new ArrayList<>();
     private final Map<String, MethodHandler> mMethodHandlers = new HashMap<>();
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_SCREEN_ON.equals(action))
+                onScreenOn();
+            else if (Intent.ACTION_SCREEN_OFF.equals(action))
+                onScreenOff();
+        }
+    };
 
     @SuppressLint("SetJavaScriptEnabled")
     public WebViewBridgeManager(@NonNull Activity activity, @NonNull WebView webView, @Nullable WebSettingsOptions options) {
@@ -131,6 +144,40 @@ public class WebViewBridgeManager {
         this.webView.setWebViewClient(new MyWebViewClient());
         this.webView.setWebChromeClient(new MyWebChromeClient());
         registerDefaultMethodHandlers();
+        registerBroadcastReceiver();
+    }
+
+    private void registerDefaultMethodHandlers() {
+        registerMethodHander(new ShowToastHandler(activity));
+        registerMethodHander(new ShowAlertDialogHandler(activity));
+        registerMethodHander(new GetAppInfoHandler(activity));
+        registerMethodHander(new GetDeviceInfoHandler(activity));
+        registerMethodHander(new GetDisplayInfoHandler(activity));
+        registerMethodHander(new GetConfigurationInfoHandler(activity));
+        registerMethodHander(new GetAudioInfoHandler(activity));
+        registerMethodHander(new SetOrientationHandler(activity));
+        registerMethodHander(new SetMicrophoneOnHandler(activity));
+        registerMethodHander(new SetSpeakerOnHandler(activity));
+        registerMethodHander(new SetMuteHandler(activity));
+        registerMethodHander(new SetAudioVolumeHandler(activity));
+        registerMethodHander(new DialPhoneHandler(activity));
+        registerMethodHander(new CallPhoneHandler(activity));
+        registerMethodHander(new CaptureImageHandler(activity));
+        registerMethodHander(new CaptureVideoHandler(activity));
+        registerMethodHander(new PickContentHandler(activity));
+        registerMethodHander(new ViewFileHandler(activity));
+        registerMethodHander(new ExitAppHandler(activity));
+        registerMethodHander(new UploadFileHandler(activity));
+        registerMethodHander(new DownloadFileHandler(activity));
+        registerMethodHander(new StartVibratorHandler(activity));
+        registerMethodHander(new CancelVibratorHandler(activity));
+    }
+
+    private void registerBroadcastReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        activity.registerReceiver(mReceiver, filter);
     }
 
     public void onPause() {
@@ -152,9 +199,9 @@ public class WebViewBridgeManager {
     }
 
     public void onDestroy() {
-            Message msg = new Message();
-            msg.type = "onDestroy";
-            postMessage(msg);
+        Message msg = new Message();
+        msg.type = "onDestroy";
+        postMessage(msg);
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -197,8 +244,20 @@ public class WebViewBridgeManager {
         }
     }
 
+    public void onScreenOn() {
+        Message msg = new Message();
+        msg.type = "onScreenOn";
+        postMessage(msg);
+    }
+
+    public void onScreenOff() {
+        Message msg = new Message();
+        msg.type = "onScreenOff";
+        postMessage(msg);
+    }
+
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        for (MethodHandler handler: mMethodHandlers.values()) {
+        for (MethodHandler handler : mMethodHandlers.values()) {
             if (handler.hasActivityResult()) {
                 List<Integer> requestCodes = handler.getRequestCodes();
                 if (requestCodes.contains(requestCode))
@@ -229,32 +288,6 @@ public class WebViewBridgeManager {
 
     public void unregisterMethodHandler(MethodHandler handler) {
         mMethodHandlers.remove(handler.getMethod());
-    }
-
-    private void registerDefaultMethodHandlers() {
-        registerMethodHander(new ShowToastHandler(activity));
-        registerMethodHander(new ShowAlertDialogHandler(activity));
-        registerMethodHander(new GetAppInfoHandler(activity));
-        registerMethodHander(new GetDeviceInfoHandler(activity));
-        registerMethodHander(new GetDisplayInfoHandler(activity));
-        registerMethodHander(new GetConfigurationInfoHandler(activity));
-        registerMethodHander(new GetAudioInfoHandler(activity));
-        registerMethodHander(new SetOrientationHandler(activity));
-        registerMethodHander(new SetMicrophoneOnHandler(activity));
-        registerMethodHander(new SetSpeakerOnHandler(activity));
-        registerMethodHander(new SetMuteHandler(activity));
-        registerMethodHander(new SetAudioVolumeHandler(activity));
-        registerMethodHander(new DialPhoneHandler(activity));
-        registerMethodHander(new CallPhoneHandler(activity));
-        registerMethodHander(new CaptureImageHandler(activity));
-        registerMethodHander(new CaptureVideoHandler(activity));
-        registerMethodHander(new PickContentHandler(activity));
-        registerMethodHander(new ViewFileHandler(activity));
-        registerMethodHander(new ExitAppHandler(activity));
-        registerMethodHander(new UploadFileHandler(activity));
-        registerMethodHander(new DownloadFileHandler(activity));
-        registerMethodHander(new StartVibratorHandler(activity));
-        registerMethodHander(new CancelVibratorHandler(activity));
     }
 
     private void notifyMethodHandler(@NonNull Message message) {
