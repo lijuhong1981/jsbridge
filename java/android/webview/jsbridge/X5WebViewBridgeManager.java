@@ -4,33 +4,44 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.net.http.SslError;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
-import android.webkit.PermissionRequest;
-import android.webkit.SslErrorHandler;
-import android.webkit.WebChromeClient;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.tencent.smtt.export.external.interfaces.PermissionRequest;
+import com.tencent.smtt.export.external.interfaces.SslError;
+import com.tencent.smtt.export.external.interfaces.SslErrorHandler;
+import com.tencent.smtt.export.external.interfaces.WebResourceError;
+import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
+import com.tencent.smtt.export.external.interfaces.WebResourceResponse;
+import com.tencent.smtt.sdk.WebChromeClient;
+import com.tencent.smtt.sdk.WebSettings;
+import com.tencent.smtt.sdk.WebView;
+import com.tencent.smtt.sdk.WebViewClient;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Objects;
 
-public class WebViewBridgeManager extends BaseWebViewBridgeManager {
+public class X5WebViewBridgeManager extends BaseWebViewBridgeManager {
     public final WebView webView;
     public final WebSettings webSettings;
 
+    private WebSettings.LayoutAlgorithm convertLayoutAlgorithm(android.webkit.WebSettings.LayoutAlgorithm layoutAlgorithm) {
+        switch (layoutAlgorithm) {
+            case NARROW_COLUMNS:
+                return WebSettings.LayoutAlgorithm.NARROW_COLUMNS;
+            case SINGLE_COLUMN:
+                return WebSettings.LayoutAlgorithm.SINGLE_COLUMN;
+        }
+        return WebSettings.LayoutAlgorithm.NORMAL;
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
-    public WebViewBridgeManager(@NonNull Activity activity, @NonNull WebView webView, @Nullable WebSettingsOptions options) {
+    public X5WebViewBridgeManager(@NonNull Activity activity, @NonNull WebView webView, @Nullable WebSettingsOptions options) {
         super(activity);
         this.webView = webView;
         if (options == null)
@@ -46,21 +57,21 @@ public class WebViewBridgeManager extends BaseWebViewBridgeManager {
         webSettings.setDomStorageEnabled(options.domStorageEnabled);
         webSettings.setGeolocationEnabled(options.geolocationEnabled);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(options.javaScriptCanOpenWindowsAutomatically);
-        webSettings.setLayoutAlgorithm(options.layoutAlgorithm);
+        webSettings.setLayoutAlgorithm(convertLayoutAlgorithm(options.layoutAlgorithm));
         webSettings.setLoadsImagesAutomatically(options.loadsImagesAutomatically);
         webSettings.setLoadWithOverviewMode(options.loadWithOverviewMode);
         webSettings.setMediaPlaybackRequiresUserGesture(options.mediaPlaybackRequiresUserGesture);
-        webSettings.setMixedContentMode(options.mixedContentMode);
+//        webSettings.setMixedContentMode(options.mixedContentMode);
         webSettings.setNeedInitialFocus(options.needInitialFocus);
-        webSettings.setOffscreenPreRaster(options.offscreenPreRaster);
+//        webSettings.setOffscreenPreRaster(options.offscreenPreRaster);
         webSettings.setSafeBrowsingEnabled(options.safeBrowsingEnabled);
         webSettings.setSupportMultipleWindows(options.supportMultipleWindows);
         webSettings.setSupportZoom(options.supportZoom);
         webSettings.setUseWideViewPort(options.useWideViewPort);
         if (!TextUtils.isEmpty(options.defaultTextEncodingName))
             webSettings.setDefaultTextEncodingName(options.defaultTextEncodingName);
-        if (options.disabledActionModeMenuItems >= 0)
-            webSettings.setDisabledActionModeMenuItems(options.disabledActionModeMenuItems);
+//        if (options.disabledActionModeMenuItems >= 0)
+//            webSettings.setDisabledActionModeMenuItems(options.disabledActionModeMenuItems);
         if (!TextUtils.isEmpty(options.cursiveFontFamily))
             webSettings.setCursiveFontFamily(options.cursiveFontFamily);
         if (!TextUtils.isEmpty(options.fantasyFontFamily))
@@ -187,6 +198,7 @@ public class WebViewBridgeManager extends BaseWebViewBridgeManager {
         @Override
         public void onPermissionRequest(PermissionRequest request) {
             Log.i(TAG, "onPermissionRequest: " + request.toString());
+            super.onPermissionRequest(request);
             request.grant(request.getResources());
         }
     }

@@ -5,10 +5,10 @@ import androidx.annotation.NonNull;
 import org.json.JSONObject;
 
 public class MessageCallbackHandler {
-    private final WebViewBridgeManager mManager;
+    private final WebViewBridgeManagerInterface mManager;
     private final String mCallbackId;
 
-    public MessageCallbackHandler(@NonNull WebViewBridgeManager manager, @NonNull String callbackMsgId) {
+    public MessageCallbackHandler(@NonNull WebViewBridgeManagerInterface manager, @NonNull String callbackMsgId) {
         mManager = manager;
         mCallbackId = callbackMsgId;
     }

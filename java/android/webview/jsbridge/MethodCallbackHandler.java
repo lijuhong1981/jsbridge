@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 public class MethodCallbackHandler extends MessageCallbackHandler {
 
-    public MethodCallbackHandler(@NonNull WebViewBridgeManager manager, @NonNull String callbackMsgId) {
+    public MethodCallbackHandler(@NonNull WebViewBridgeManagerInterface manager, @NonNull String callbackMsgId) {
         super(manager, callbackMsgId);
     }
 
