@@ -9,6 +9,8 @@
 在Activity的onCreate方法下初始化WebViewBridgeManager
 
 ```java
+private WebViewBridgeManagerInterface mManager;
+
 @Override
 protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -18,6 +20,7 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
     WebSettingsOptions options = new WebSettingsOptions();
     ...
     mManager = new WebViewBridgeManager(this, webView, options);
+    // mManager = new X5WebViewBridgeManager(this, webView, options); //腾讯X5内核浏览器组件
 }
 ```
 
