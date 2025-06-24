@@ -45,8 +45,6 @@ public interface WebViewBridgeManagerInterface {
 
     void postLogMessage(int priority, @Nullable String tag, @NonNull String msg);
 
-    void postLogMessage(@Nullable String tag, @NonNull String msg, @Nullable Throwable tr);
-
     void postLogMessage(@Nullable String tag, @NonNull String msg);
 
     void postErrorMessage(@Nullable String tag, @NonNull String msg, @Nullable Throwable tr);

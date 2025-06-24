@@ -304,11 +304,6 @@ abstract class BaseWebViewBridgeManager implements WebViewBridgeManagerInterface
     }
 
     @Override
-    public void postLogMessage(@Nullable String tag, @NonNull String msg, @Nullable Throwable tr) {
-        postLogMessage(0, tag, msg, tr);
-    }
-
-    @Override
     public void postLogMessage(@Nullable String tag, @NonNull String msg) {
         postLogMessage(0, tag, msg, null);
     }
