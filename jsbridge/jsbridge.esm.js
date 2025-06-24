@@ -1029,6 +1029,15 @@ const onEvent = new EventEmitter();
  * @param {ResultData} result 执行结果对象
 */
 
+const Priorities = Object.freeze({
+    VERBOSE: 2,
+    DEBUG: 3,
+    INFO: 4,
+    WARN: 5,
+    ERROR: 6,
+    ASSERT: 7,
+});
+
 /**
  * 检查当前jsbridge是否可用
  * @returns {boolean}
@@ -1104,6 +1113,25 @@ function onReceiveMessage(json) {
             callback(message.body);
         if (!message.persistCallback)
             delete messageCallbacks[message.id];
+    } else if (message.type === 'logMessage') {
+        const priority = message.body.priority;
+        switch (priority) {
+            case Priorities.DEBUG:
+                message.body.error ? console.debug(message.body.tag, message.body.msg, message.body.error) : console.log(message.body.tag, message.body.msg);
+                break;
+            case Priorities.INFO:
+                message.body.error ? console.info(message.body.tag, message.body.msg, message.body.error) : console.log(message.body.tag, message.body.msg);
+                break;
+            case Priorities.WARN:
+                message.body.error ? console.warn(message.body.tag, message.body.msg, message.body.error) : console.log(message.body.tag, message.body.msg);
+                break;
+            case Priorities.ERROR:
+                message.body.error ? console.error(message.body.tag, message.body.msg, message.body.error) : console.log(message.body.tag, message.body.msg);
+                break;
+            default:
+                message.body.error ? console.log(message.body.tag, message.body.msg, message.body.error) : console.log(message.body.tag, message.body.msg);
+                break;
+        }
     } else {
         onMessage.raiseEvent(message);
         onEvent.emit(message.type, message.body);

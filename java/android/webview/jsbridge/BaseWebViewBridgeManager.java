@@ -277,6 +277,47 @@ abstract class BaseWebViewBridgeManager implements WebViewBridgeManagerInterface
         }
     }
 
+    @Override
+    public void postLogMessage(int priority, @Nullable String tag, @NonNull String msg, @Nullable Throwable tr) {
+        try {
+            Message message = new Message();
+            message.type = "logMessage";
+            message.body = new JSONObject();
+            message.body.put("priority", priority);
+            message.body.put("tag", tag);
+            message.body.put("msg", msg);
+            if (tr != null) {
+                JSONObject errorInfo = new JSONObject();
+                errorInfo.put("class", tr.getClass().getSimpleName());
+                errorInfo.put("description", tr.getMessage());
+                message.body.put("error", errorInfo);
+            }
+            postMessage(msg);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void postLogMessage(int priority, @Nullable String tag, @NonNull String msg) {
+        postLogMessage(priority, tag, msg, null);
+    }
+
+    @Override
+    public void postLogMessage(@Nullable String tag, @NonNull String msg, @Nullable Throwable tr) {
+        postLogMessage(0, tag, msg, tr);
+    }
+
+    @Override
+    public void postLogMessage(@Nullable String tag, @NonNull String msg) {
+        postLogMessage(0, tag, msg, null);
+    }
+
+    @Override
+    public void postErrorMessage(@Nullable String tag, @NonNull String msg, @Nullable Throwable tr) {
+        postLogMessage(Log.ERROR, tag, msg, tr);
+    }
+
     class AndroidInterface {
 
         @JavascriptInterface

@@ -7,37 +7,47 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public interface WebViewBridgeManagerInterface {
-    public void onPause();
+    void onPause();
 
-    public void onResume();
+    void onResume();
 
-    public void onStop();
+    void onStop();
 
-    public void onDestroy();
+    void onDestroy();
 
-    public void onWindowFocusChanged(boolean hasFocus);
+    void onWindowFocusChanged(boolean hasFocus);
 
-    public void onConfigurationChanged(@NonNull Configuration newConfig);
+    void onConfigurationChanged(@NonNull Configuration newConfig);
 
-    public void onScreenOn();
+    void onScreenOn();
 
-    public void onScreenOff();
+    void onScreenOff();
 
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data);
+    void onActivityResult(int requestCode, int resultCode, @Nullable Intent data);
 
-    public void registerMessageReceiver(@NonNull MessageReceiver receiver);
+    void registerMessageReceiver(@NonNull MessageReceiver receiver);
 
-    public void unregisterMessageReceiver(@NonNull MessageReceiver receiver);
+    void unregisterMessageReceiver(@NonNull MessageReceiver receiver);
 
     void notifyMessageReceivers(@NonNull Message message);
 
-    public void registerMethodHander(MethodHandler handler);
+    void registerMethodHander(MethodHandler handler);
 
-    public void unregisterMethodHandler(MethodHandler handler);
+    void unregisterMethodHandler(MethodHandler handler);
 
     void notifyMethodHandler(@NonNull Message message);
 
-    public void postMessage(@NonNull String jsonString);
+    void postMessage(@NonNull String jsonString);
 
-    public void postMessage(@NonNull Message message);
+    void postMessage(@NonNull Message message);
+
+    void postLogMessage(int priority, @Nullable String tag, @NonNull String msg, @Nullable Throwable tr);
+
+    void postLogMessage(int priority, @Nullable String tag, @NonNull String msg);
+
+    void postLogMessage(@Nullable String tag, @NonNull String msg, @Nullable Throwable tr);
+
+    void postLogMessage(@Nullable String tag, @NonNull String msg);
+
+    void postErrorMessage(@Nullable String tag, @NonNull String msg, @Nullable Throwable tr);
 }
